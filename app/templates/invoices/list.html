@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Invoices &middot; Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; 1 &nbsp; Invoices</h1>
+
+  <form method="get" action="/app/invoices" class="form">
+    <label class="field">
+      <span>Status</span>
+      <select name="status" id="invoice-status-filter">
+        <option value="" {% if not status_filter %}selected{% endif %}>All</option>
+        <option value="draft" {% if status_filter == "draft" %}selected{% endif %}>Draft</option>
+        <option value="confirmed" {% if status_filter == "confirmed" %}selected{% endif %}>Confirmed</option>
+        <option value="paid" {% if status_filter == "paid" %}selected{% endif %}>Paid</option>
+        <option value="cancelled" {% if status_filter == "cancelled" %}selected{% endif %}>Cancelled</option>
+      </select>
+    </label>
+    <button class="button" type="submit" id="invoice-filter-btn">Filter</button>
+  </form>
+
+  <table class="ledger-table">
+    <thead>
+      <tr>
+        <th>Number</th>
+        <th>Customer</th>
+        <th>Subscription</th>
+        <th>Period</th>
+        <th>Issued</th>
+        <th>Due</th>
+        <th>Total ({{ currency }})</th>
+        <th>Paid ({{ currency }})</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for inv in invoices %}
+        <tr>
+          <td><a href="/app/invoices/{{ inv.id }}">{{ inv.number or "DRAFT" }}</a></td>
+          <td>{{ inv.customer_name }}</td>
+          <td><a href="/app/subscriptions/{{ inv.subscription_id }}">{{ inv.sub_number }}</a></td>
+          <td>{{ inv.period_start }} – {{ inv.period_end }}</td>
+          <td>{{ inv.issue_date }}</td>
+          <td>{{ inv.due_date }}</td>
+          <td>{{ inv.total_minor | money }}</td>
+          <td>{{ inv.amount_paid_minor | money }}</td>
+          <td><span class="stamp stamp--{{ inv.status }}">{{ inv.status }}</span></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="9">No invoices found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if pages > 1 %}
+  <nav class="pagination">
+    {% if page > 1 %}<a href="?status={{ status_filter }}&page={{ page - 1 }}" class="link-button">&larr; Prev</a>{% endif %}
+    <span class="small">Page {{ page }} of {{ pages }} &middot; {{ total }} total</span>
+    {% if page < pages %}<a href="?status={{ status_filter }}&page={{ page + 1 }}" class="link-button">Next &rarr;</a>{% endif %}
+  </nav>
+  {% endif %}
+</section>
+{% endblock %}
