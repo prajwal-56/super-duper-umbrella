@@ -164,31 +164,31 @@
     {# ============================================================= #}
     {{ section_head("5", "Form Fields") }}
 
-    <form action="#" method="post" style="max-width: 36rem;">
+    <form action="#" method="post">
       <div class="field-row">
-        {{ field("customer_name", "Customer name", required=true, value="Mehta Trading Co.") }}
-        {{ field("email", "Email", type="email", placeholder="billing@example.com") }}
+        {{ field("Customer name", "customer_name", required=true, value="Mehta Trading Co.") }}
+        {{ field("Email", "email", type="email", placeholder="billing@example.com") }}
       </div>
 
       <div class="field-row">
-        {{ field("quantity", "Quantity", type="number", value="5") }}
-        {{ field("start_date", "Start date", type="date", value="2026-11-01") }}
+        {{ field("Quantity", "quantity", type="number", value="5") }}
+        {{ field("Start date", "start_date", type="date", value="2026-11-01") }}
       </div>
 
-      {{ select_field("plan_id", "Billing plan", [
+      {{ select_field("Billing plan", "plan_id", [
         ("1", "Monthly — Standard"),
         ("2", "Yearly — Premium"),
         ("3", "Weekly — Trial"),
       ], selected="1") }}
 
-      {{ textarea_field("notes", "Notes", value="Renewal pending approval from finance team.", rows=3) }}
+      {{ textarea_field("Notes", "notes", value="Renewal pending approval from finance team.", rows=3) }}
 
-      {{ field("password", "Password", type="password", error="Must be more than 8 characters with uppercase, lowercase, and a special character.") }}
+      {{ field("Password", "password", type="password", error="Must be more than 8 characters with uppercase, lowercase, and a special character.") }}
 
       <div class="field-row">
-        {{ checkbox_field("auto_close", "Auto-close at expiry", checked=true) }}
-        {{ checkbox_field("allow_pause", "Allow pause") }}
-        {{ checkbox_field("allow_renew", "Allow renew", checked=true) }}
+        {{ checkbox_field("Auto-close at expiry", "auto_close", checked=true) }}
+        {{ checkbox_field("Allow pause") }}
+        {{ checkbox_field("Allow renew", checked=true) }}
       </div>
 
       <div class="btn-group mt-2">
@@ -293,8 +293,8 @@
     {{ section_head("14", "Filter Bar") }}
 
     {% call filter_bar(action="/app/subscriptions", method="get") %}
-      {{ field("search", "Search", placeholder="SUB-000042 or customer name") }}
-      {{ select_field("status", "Status", [
+      {{ field("Search", "search", placeholder="SUB-000042 or customer name") }}
+      {{ select_field("Status", "status", [
         ("active", "Active"),
         ("draft", "Draft"),
         ("closed", "Closed")
@@ -332,7 +332,7 @@
           <td><code>{{ name }}</code></td>
           <td><code>{{ hex }}</code></td>
           <td>{{ usage }}</td>
-          <td><span style="display:inline-block;width:3rem;height:1.2rem;background:{{ hex }};border:1px solid var(--rule);"></span></td>
+          <td><span></span></td>
         </tr>
         {% endfor %}
       {% endcall %}

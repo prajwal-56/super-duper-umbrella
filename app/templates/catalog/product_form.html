@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "_ui.html" import field, select_field, textarea_field, checkbox_field, button %}
+{% block title %}{{ "Edit" if product else "New" }} Product · Catalog · Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; {{ "Edit product" if product else "New product" }}</h1>
+
+  {% if errors is defined and errors %}
+    <div class="errors">
+      {% for e in errors %}<p class="error">{{ e }}</p>{% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post"
+        action="{{ '/app/catalog/products/' ~ product.id ~ '/edit' if product else '/app/catalog/products/new' }}"
+        class="form" id="product-form">
+
+    {{ field("Name", "name",
+             name if name is defined else (product.name if product else ""),
+             required=true, id="product-name") }}
+
+    {{ select_field("Type", "product_type",
+                     [("service", "Service"), ("goods", "Goods")],
+                     product_type if product_type is defined else (product.type if product else "service"),
+                     id="product-type") }}
+
+    {{ field("Sales price (INR)", "sales_price",
+             sales_price if sales_price is defined
+             else (product.sales_price_minor | money if product else ""),
+             placeholder="0.00", id="product-sales-price") }}
+
+    {{ field("Cost price (INR)", "cost_price",
+             cost_price if cost_price is defined
+             else (product.cost_price_minor | money if product else ""),
+             placeholder="0.00", id="product-cost-price") }}
+
+    {% set tax_options = [("", "— None —")] %}
+    {% for t in taxes %}
+      {% set _ = tax_options.append((t.id | string, t.name ~ " (" ~ "%.1f"|format(t.rate_bps / 100) ~ "%)")) %}
+    {% endfor %}
+    {{ select_field("Tax rule", "tax_id", tax_options,
+                     tax_id if tax_id is defined else (product.tax_id | string if product and product.tax_id else ""),
+                     id="product-tax") }}
+
+    {{ textarea_field("Notes", "notes",
+                       notes if notes is defined else (product.notes if product else ""),
+                       id="product-notes") }}
+
+    {% if product %}
+      {{ checkbox_field("Active", "active",
+                         active if active is defined else product.active,
+                         id="product-active") }}
+    {% endif %}
+
+    <div class="form-actions">
+      {{ button("Save", type="submit", variant="primary", id="product-save") }}
+      <a href="/app/catalog/products{% if product %}/{{ product.id }}{% endif %}" class="button">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -81,15 +81,16 @@
 
 
 {# ---- FIELD (text, email, password, number, date) ----
-   Usage: {{ field("email", "Email address", type="email", required=true, value=form.email) }}
+   Usage: {{ field("Email address", "email", value=form.email, type="email", required=true) }}
 #}
-{% macro field(name, label, type="text", value="", required=false, placeholder="", error="", readonly=false, help="") -%}
+{% macro field(label, name, value="", type="text", required=false, placeholder="", error="", readonly=false, help="", hint="", id="") -%}
+{%- set fid = id or ("field-" ~ name) -%}
 <div class="field">
-  <label class="field__label" for="field-{{ name }}">{{ label }}{% if required %} *{% endif %}</label>
+  <label class="field__label" for="{{ fid }}">{{ label }}{% if required %} *{% endif %}</label>
   <input
     class="field__input"
     type="{{ type }}"
-    id="field-{{ name }}"
+    id="{{ fid }}"
     name="{{ name }}"
     value="{{ value }}"
     {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
@@ -99,21 +100,22 @@
   {%- if error %}
   <div class="field__error">{{ error }}</div>
   {%- endif %}
-  {%- if help %}
-  <div class="text-soft" style="font-size: 11px; margin-top: 0.15rem;">{{ help }}</div>
+  {%- if help or hint %}
+  <div class="hint">{{ help or hint }}</div>
   {%- endif %}
 </div>
 {%- endmacro %}
 
 
 {# ---- SELECT FIELD ----
-   Usage: {{ select_field("plan_id", "Plan", options, selected=form.plan_id) }}
+   Usage: {{ select_field("Plan", "plan_id", options, selected=form.plan_id) }}
    options: list of dicts with 'value' and 'label' keys, or list of (value, label) tuples.
 #}
-{% macro select_field(name, label, options, selected="", required=false, error="", blank_label="— Select —") -%}
+{% macro select_field(label, name, options, selected="", required=false, error="", blank_label="", id="") -%}
+{%- set fid = id or ("field-" ~ name) -%}
 <div class="field">
-  <label class="field__label" for="field-{{ name }}">{{ label }}{% if required %} *{% endif %}</label>
-  <select class="field__select" id="field-{{ name }}" name="{{ name }}" {% if required %}required{% endif %}>
+  <label class="field__label" for="{{ fid }}">{{ label }}{% if required %} *{% endif %}</label>
+  <select class="field__select" id="{{ fid }}" name="{{ name }}" {% if required %}required{% endif %}>
     {%- if blank_label %}
     <option value="">{{ blank_label }}</option>
     {%- endif %}
@@ -133,14 +135,15 @@
 
 
 {# ---- TEXTAREA FIELD ----
-   Usage: {{ textarea_field("notes", "Notes", value=form.notes, rows=4) }}
+   Usage: {{ textarea_field("Notes", "notes", value=form.notes, rows=4) }}
 #}
-{% macro textarea_field(name, label, value="", required=false, error="", rows=4, placeholder="") -%}
+{% macro textarea_field(label, name, value="", required=false, error="", rows=4, placeholder="", id="") -%}
+{%- set fid = id or ("field-" ~ name) -%}
 <div class="field">
-  <label class="field__label" for="field-{{ name }}">{{ label }}{% if required %} *{% endif %}</label>
+  <label class="field__label" for="{{ fid }}">{{ label }}{% if required %} *{% endif %}</label>
   <textarea
     class="field__textarea"
-    id="field-{{ name }}"
+    id="{{ fid }}"
     name="{{ name }}"
     rows="{{ rows }}"
     {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
@@ -154,12 +157,13 @@
 
 
 {# ---- CHECKBOX FIELD ----
-   Usage: {{ checkbox_field("auto_close", "Auto-close", checked=plan.auto_close) }}
+   Usage: {{ checkbox_field("Auto-close", "auto_close", checked=plan.auto_close) }}
 #}
-{% macro checkbox_field(name, label, checked=false, value="true", error="") -%}
+{% macro checkbox_field(label, name, checked=false, value="true", error="", id="") -%}
+{%- set fid = id or ("field-" ~ name) -%}
 <div class="field field--inline">
-  <input class="field__input" type="checkbox" id="field-{{ name }}" name="{{ name }}" value="{{ value }}" {% if checked %}checked{% endif %}>
-  <label class="field__label" for="field-{{ name }}">{{ label }}</label>
+  <input class="field__input" type="checkbox" id="{{ fid }}" name="{{ name }}" value="{{ value }}" {% if checked %}checked{% endif %}>
+  <label class="field__label" for="{{ fid }}">{{ label }}</label>
   {%- if error %}
   <div class="field__error">{{ error }}</div>
   {%- endif %}
@@ -172,15 +176,15 @@
           {{ button("Delete", variant="destructive") }}
           {{ button("View", href="/path", variant="default") }}
 #}
-{% macro button(text, type="button", variant="default", href="", disabled=false, name="", value="") -%}
+{% macro button(text, type="button", variant="default", href="", disabled=false, name="", value="", id="") -%}
 {%- set cls = "btn" -%}
 {%- if variant == "primary" %}{% set cls = cls ~ " btn--primary" %}{% endif -%}
 {%- if variant == "destructive" %}{% set cls = cls ~ " btn--destructive" %}{% endif -%}
 {%- if disabled %}{% set cls = cls ~ " btn--disabled" %}{% endif -%}
 {%- if href %}
-<a class="{{ cls }}" href="{{ href }}"{% if disabled %} aria-disabled="true"{% endif %}>{{ text }}</a>
+<a class="{{ cls }}" href="{{ href }}"{% if disabled %} aria-disabled="true"{% endif %}{% if id %} id="{{ id }}"{% endif %}>{{ text }}</a>
 {%- else %}
-<button class="{{ cls }}" type="{{ type }}" {% if disabled %}disabled{% endif %} {% if name %}name="{{ name }}" value="{{ value }}"{% endif %}>{{ text }}</button>
+<button class="{{ cls }}" type="{{ type }}" {% if disabled %}disabled{% endif %} {% if name %}name="{{ name }}" value="{{ value }}"{% endif %}{% if id %} id="{{ id }}"{% endif %}>{{ text }}</button>
 {%- endif %}
 {%- endmacro %}
 
