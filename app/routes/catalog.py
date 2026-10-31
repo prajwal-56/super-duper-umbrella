@@ -9,7 +9,7 @@ from fastapi.responses import RedirectResponse
 
 from app.db import conn
 from app.deps import User, require
-from app.money import fmt, parse
+from app.money import parse
 from app.services import catalog as svc
 from app.templating import render
 
@@ -29,7 +29,7 @@ def _int(value: str | None, default: int = 0) -> int:
 
 def _bps_from_percent(text: str) -> int:
     """'18' or '18.5' → basis points (1800 or 1850)."""
-    from decimal import Decimal, ROUND_HALF_UP
+    from decimal import ROUND_HALF_UP, Decimal
     d = Decimal(text.strip())
     return int((d * 100).to_integral_value(rounding=ROUND_HALF_UP))
 

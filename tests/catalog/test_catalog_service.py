@@ -9,7 +9,6 @@ import pytest
 
 from app.services import catalog as svc
 
-
 # ── Fixtures ─────────────────────────────────────────────────────────────
 
 @pytest.fixture
@@ -123,7 +122,7 @@ class TestProductCRUD:
 
 class TestVariantCRUD:
     def test_create_and_list(self, db, product_basic):
-        vid = svc.create_variant(db, product_basic, "Storage", "100GB", 5000, actor_id=1)
+        svc.create_variant(db, product_basic, "Storage", "100GB", 5000, actor_id=1)
         variants = svc.list_variants(db, product_basic)
         assert len(variants) == 1
         assert variants[0]["attribute"] == "Storage"
