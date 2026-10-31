@@ -62,3 +62,12 @@
 - Tests: make check -> 76 passed, 1 warning in 8.84s
 - Next: B-09 (real-Postgres engine concurrency tests) / B-11 (daily job)
 - Needs from others: D to implement `invariants.run_all` so runs store real INV-01..08 counts.
+
+## 2026-10-31 14:17 IST — B — B-09 — DONE
+- Did: Added real-Postgres engine concurrency tests in `tests/engine/test_run_billing_concurrency.py`: 4 simultaneous live runs over one subscription with 5 missing periods (no duplicate periods, accounting rule on every run), 8 simultaneous runs against a `usage_limit = 1` discount (exactly one claim and one redemption), partial-progress/crash simulation (2 committed periods, re-run bills the remaining 3 with no gap or duplicate, then 0), and pause/void/catch-up/up-to-date dispositions with `considered == items`.
+- Files: tests/engine/test_run_billing_concurrency.py, docs/log/b.md, docs/tasks/b.md
+- Contract changes: none
+- Decisions: none
+- Tests: make check -> 152 passed, 1 warning in 30.83s
+- Next: B-11 (`jobs/daily.py` + `/internal/daily`) / B-10 (`chaos.hammer`)
+- Needs from others: none
