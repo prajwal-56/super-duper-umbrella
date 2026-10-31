@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Outbox &middot; Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; 1 &nbsp; Outbox</h1>
+
+  <p class="small">The last {{ page_size }} messages the system wrote, newest first. Nothing is sent unless SMTP is configured; the text is always kept here.</p>
+
+  <form method="get" action="/app/outbox" class="form">
+    <label class="field">
+      <span>Kind</span>
+      <select name="kind">
+        <option value="">All kinds</option>
+        {% for name in kinds %}
+          <option value="{{ name }}"{% if name == kind %} selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="button" type="submit">Filter</button>
+  </form>
+
+  {% if emails %}
+    <table class="ledger-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Written</th>
+          <th>Kind</th>
+          <th>To</th>
+          <th>Subject</th>
+          <th>SMTP</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for email in emails %}
+          <tr>
+            <td>{{ email.id }}</td>
+            <td>{{ email.created_at.strftime("%d %b %Y %H:%M") }}</td>
+            <td>{{ email.kind }}</td>
+            <td>{{ email.to_email }}</td>
+            <td>
+              <details>
+                <summary>{{ email.subject }}</summary>
+                <div class="outbox-body">{{ email.body_html | safe }}</div>
+                {% if email.link %}
+                  <p class="small">Link: <a href="{{ email.link }}">{{ email.link }}</a></p>
+                {% endif %}
+              </details>
+            </td>
+            <td>{{ email.smtp_status or "not sent" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="notice">No messages yet. A password reset or an invoice reminder will appear here.</p>
+  {% endif %}
+</section>
+{% endblock %}

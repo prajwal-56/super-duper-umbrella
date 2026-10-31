@@ -43,3 +43,12 @@ Append-only, newest at the bottom. Format: BUILD_PLAN §6.
 - Tests: `make check` -> `57 passed, 1 warning in 10.08s`.
 - Next: A-11 portal (own subscriptions, own invoices, print view, profile) with the IDOR tests.
 - Needs from others: C: C-01 does not implement the `base.html` class contract — issue filed, fix before merge; B/D: rebase their branches onto `main` (all five open PRs conflict and have no CI run).
+
+## 2026-10-31 13:10 IST — A — A-13 — DONE
+- Did: `/app/outbox` viewer behind `report:read`: newest 50 messages, kind filter that falls back to all kinds, each subject opens to the rendered body and its clickable link, SMTP column shows `not sent` when SMTP is off, and an empty state that says what will appear there.
+- Files: `app/routes/outbox.py`, `app/templates/outbox/index.html`, `tests/base/test_outbox_page.py`, `docs/DECISIONS.md`, `docs/tasks/a.md`.
+- Contract changes: none.
+- Decisions: D-32 — the outbox renders `body_html` unescaped, so every `queue_email` caller must escape customer-supplied text when composing a body.
+- Tests: `make check` -> `69 passed, 1 warning in 10.07s`.
+- Next: A-12 `/app/clock` page (needs `lifecycle.run_daily` from B-07 to actually advance), A-11 portal once B-07 and D-02 land.
+- Needs from others: B: rebase #2, #3, #4 on `main` (conflict is only `docs/log/b.md`); C: fix #5 (style lint: 3 inline `style=` attributes) and the class-name issue #57; D: rebase issue #6.
