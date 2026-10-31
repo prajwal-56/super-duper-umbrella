@@ -70,6 +70,14 @@ def _bad_origin(request: Request) -> bool:
     elif "://127.0.0.1:" in base:
         allowed.add(base.replace("://127.0.0.1:", "://localhost:"))
 
+    # Forwarded host support (e.g. Cloudflare tunnel, ngrok, reverse proxy)
+    forwarded_host = request.headers.get("x-forwarded-host") or request.headers.get("host")
+    if forwarded_host:
+        proto = request.headers.get("x-forwarded-proto", "https")
+        allowed.add(f"{proto}://{forwarded_host}")
+        allowed.add(f"http://{forwarded_host}")
+        allowed.add(f"https://{forwarded_host}")
+
     if origin:
         return not any(origin.startswith(a) for a in allowed)
     if referer:
