@@ -154,3 +154,15 @@ def test_reset_token_is_single_use(client, create_user):
 
     reuse = client.get(f"/reset/{token}")
     assert reuse.status_code == 410
+
+
+def test_ensure_admin_creates_one_admin_from_env():
+    from app.auth.service import ensure_admin
+    from app.config import settings
+
+    assert ensure_admin() is True
+    assert ensure_admin() is False
+    with conn() as c:
+        rows = c.execute("SELECT email, role FROM users WHERE role = 'admin'").fetchall()
+    assert len(rows) == 1
+    assert str(rows[0]["email"]) == settings.admin_email

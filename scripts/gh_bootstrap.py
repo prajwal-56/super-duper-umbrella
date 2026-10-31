@@ -116,8 +116,8 @@ def existing_issue_titles(dry_run: bool) -> set[str]:
     return {line for line in output.splitlines() if line}
 
 
-def task_rows() -> list[tuple[str, str, str, int]]:
-    """(owner, task_id, text, tier) from docs/tasks/<handle>.md."""
+def task_rows() -> list[tuple[str, str, str, int, bool]]:
+    """(owner, task_id, text, tier, done) from docs/tasks/<handle>.md."""
     rows = []
     for path in sorted(TASKS_DIR.glob("*.md")):
         owner = path.stem.upper()
@@ -127,13 +127,13 @@ def task_rows() -> list[tuple[str, str, str, int]]:
                 continue
             task_id, text = match.group(1), match.group(2).strip()
             tier = 2 if "Tier 2" in text else 1 if "Tier 1" in text else 0
-            rows.append((owner, task_id, text, tier))
+            rows.append((owner, task_id, text, tier, line.startswith("- [x]")))
     return rows
 
 
 def ensure_issues(dry_run: bool) -> None:
     titles = existing_issue_titles(dry_run)
-    for owner, task_id, text, tier in task_rows():
+    for owner, task_id, text, tier, done in task_rows():
         label_text = re.sub(r"^Tier [12]:\s*", "", text)
         title = f"{task_id}: {label_text}"[:240]
         if any(existing.startswith(task_id + ":") for existing in titles):
@@ -143,7 +143,7 @@ def ensure_issues(dry_run: bool) -> None:
             f"{text}\n\n"
             f"Source: `docs/tasks/{owner.lower()}.md` (BUILD_PLAN §17).\n"
         )
-        run(
+        url = run(
             [
                 "gh",
                 "issue",
@@ -159,6 +159,8 @@ def ensure_issues(dry_run: bool) -> None:
             ],
             dry_run=dry_run,
         )
+        if done and url:
+            run(["gh", "issue", "close", url, "--reason", "completed"], dry_run=dry_run)
 
 
 def protect_main(repo: str, dry_run: bool) -> None:

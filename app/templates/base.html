@@ -30,7 +30,7 @@
         </form>
       {% endif %}
       {% if system_date %}
-        <span class="system-date{% if simulated %} simulated{% endif %}">System date {{ system_date.strftime("%d %b %Y")|upper }}{% if simulated %} (simulated){% endif %}</span>
+        <span class="system-date{% if simulated %} simulated{% endif %}">SYSTEM DATE {{ system_date.strftime("%d %b %Y")|upper }}{% if simulated %} (SIMULATED){% endif %}</span>
       {% endif %}
     </div>
   </header>
