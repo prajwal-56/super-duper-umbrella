@@ -4,6 +4,11 @@
 <section class="section">
   <h1 class="section-label">&sect; 1 &nbsp; {{ subscription.number }}</h1>
 
+  {% if done %}<p class="notice">The subscription has been updated.</p>{% endif %}
+  {% if errors %}
+    <ul class="errors">{% for message in errors %}<li>{{ message }}</li>{% endfor %}</ul>
+  {% endif %}
+
   <table class="ledger-table">
     <tbody>
       <tr><td>Plan</td><td>{{ subscription.plan_name }}</td></tr>
@@ -63,4 +68,30 @@
   {% endif %}
   <p class="small"><a href="/portal">Back to the portal</a></p>
 </section>
+
+{% if actions %}
+<section class="section">
+  <h2 class="section-label">&sect; 4 &nbsp; What you can do now</h2>
+
+  {% for action in actions %}
+    {% if action != "close" %}
+      <form method="post" action="/portal/subscriptions/{{ subscription.id }}/action" class="form">
+        <input type="hidden" name="action" value="{{ action }}">
+        <button class="button" type="submit">{{ action | replace("_", " ") | capitalize }}</button>
+      </form>
+    {% endif %}
+  {% endfor %}
+
+  {% if "close" in actions %}
+    <form method="post" action="/portal/subscriptions/{{ subscription.id }}/action" class="form">
+      <input type="hidden" name="action" value="close">
+      <label class="field">
+        <span>Reason for closing</span>
+        <input type="text" name="reason">
+      </label>
+      <button class="button destructive" type="submit">Close the subscription</button>
+    </form>
+  {% endif %}
+</section>
+{% endif %}
 {% endblock %}

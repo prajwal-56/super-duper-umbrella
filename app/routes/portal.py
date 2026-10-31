@@ -8,11 +8,12 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from fastapi.responses import RedirectResponse
 
 from app.db import conn
 from app.deps import User, require
-from app.services import portal
+from app.services import lifecycle, portal
 from app.templating import render
 
 router = APIRouter(tags=["portal"])
@@ -61,26 +62,102 @@ def portal_home(request: Request, user: OwnPortal):
     )
 
 
-@router.get("/portal/subscriptions/{subscription_id}")
-def portal_subscription(request: Request, subscription_id: int, user: OwnPortal):
-    customer_id = _customer_id(user)
-    with conn() as c:
-        subscription = portal.subscription_for_customer(c, subscription_id, customer_id)
-        if subscription is None:
-            return _not_found(request, user)
-        lines = portal.subscription_lines(c, subscription_id)
-        invoices = [
-            invoice
-            for invoice in portal.invoices_for_customer(c, customer_id)
-            if int(invoice["subscription_id"]) == subscription_id
-        ]
+def _subscription_page(
+    request: Request,
+    user: User,
+    subscription: dict,
+    lines: list[dict],
+    invoices: list[dict],
+    actions: list[str],
+    *,
+    status_code: int = 200,
+    errors: list[str] | None = None,
+    done: bool = False,
+):
     return render(
         request,
         "portal/subscription.html",
+        status_code=status_code,
         user=user,
         subscription=subscription,
         lines=lines,
         invoices=invoices,
+        actions=actions,
+        errors=errors or [],
+        done=done,
+    )
+
+
+def _load_subscription(c, subscription_id: int, customer_id: int, role: str):
+    subscription = portal.subscription_for_customer(c, subscription_id, customer_id)
+    if subscription is None:
+        return None, [], [], []
+    lines = portal.subscription_lines(c, subscription_id)
+    invoices = [
+        invoice
+        for invoice in portal.invoices_for_customer(c, customer_id)
+        if int(invoice["subscription_id"]) == subscription_id
+    ]
+    actions = lifecycle.allowed_actions(c, subscription_id, role)
+    return subscription, lines, invoices, actions
+
+
+@router.get("/portal/subscriptions/{subscription_id}")
+def portal_subscription(request: Request, subscription_id: int, user: OwnPortal, done: str = ""):
+    customer_id = _customer_id(user)
+    with conn() as c:
+        subscription, lines, invoices, actions = _load_subscription(
+            c, subscription_id, customer_id, user.role
+        )
+    if subscription is None:
+        return _not_found(request, user)
+    return _subscription_page(
+        request, user, subscription, lines, invoices, actions, done=bool(done)
+    )
+
+
+@router.post("/portal/subscriptions/{subscription_id}/action")
+def portal_action(
+    request: Request,
+    subscription_id: int,
+    user: OwnPortal,
+    action: str = Form(""),
+    reason: str = Form(""),
+):
+    customer_id = _customer_id(user)
+    with conn() as c:
+        subscription, lines, invoices, actions = _load_subscription(
+            c, subscription_id, customer_id, user.role
+        )
+        if subscription is None:
+            return _not_found(request, user)
+        if action not in actions:
+            return _subscription_page(
+                request,
+                user,
+                subscription,
+                lines,
+                invoices,
+                actions,
+                status_code=409,
+                errors=["That action is not available for this subscription now."],
+            )
+        if action == "pause":
+            lifecycle.pause(c, subscription_id, user.id)
+        elif action == "resume":
+            lifecycle.resume(c, subscription_id, user.id)
+        elif action == "renew":
+            lifecycle.renew(c, subscription_id, user.id)
+        elif action == "close":
+            lifecycle.close(
+                c, subscription_id, user.id, reason.strip() or "closed by the customer"
+            )
+        elif action == "confirm":
+            lifecycle.transition(c, subscription_id, "confirmed", user.id)
+        else:
+            raise HTTPException(status_code=409, detail="Unknown action")
+    return RedirectResponse(
+        f"/portal/subscriptions/{subscription_id}?done=1", status_code=303
     )
 
 
