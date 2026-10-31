@@ -1,6 +1,6 @@
 from datetime import date
-import pytest
-from app.domain.periods import expected_periods, Period
+
+from app.domain.periods import expected_periods
 
 
 def test_monthly_periods_anchor_clamping():
