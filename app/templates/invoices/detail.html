@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}{{ invoice.number or "DRAFT" }} &middot; Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; 1 &nbsp; Invoice {{ invoice.number or "DRAFT" }}</h1>
+
+  <div class="leaders">
+    <span>Customer</span><span>{{ invoice.customer_name }}</span>
+    <span>Subscription</span><span><a href="/app/subscriptions/{{ invoice.subscription_id }}">{{ invoice.sub_number }}</a></span>
+    <span>Period</span><span>{{ invoice.period_start }} – {{ invoice.period_end }}</span>
+    <span>Issued</span><span>{{ invoice.issue_date }}</span>
+    <span>Due</span><span>{{ invoice.due_date }}</span>
+    <span>Status</span><span><strong class="stamp stamp--{{ invoice.status }}">{{ invoice.status }}</strong></span>
+  </div>
+
+  <table class="ledger-table">
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>Qty</th>
+        <th>Unit ({{ currency }})</th>
+        <th>Subtotal ({{ currency }})</th>
+        <th>Discount ({{ currency }})</th>
+        <th>Tax ({{ currency }})</th>
+        <th>Total ({{ currency }})</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for line in invoice.lines %}
+        <tr>
+          <td>{{ line.description }}</td>
+          <td>{{ line.quantity }}</td>
+          <td>{{ line.unit_price_minor | money }}</td>
+          <td>{{ line.line_subtotal_minor | money }}</td>
+          <td>{{ line.discount_minor | money }}</td>
+          <td>{{ line.tax_minor | money }}{% if line.tax_rate_bps %} ({{ "%.0f"|format(line.tax_rate_bps / 100) }}%{% if line.tax_inclusive %} incl.{% endif %}){% endif %}</td>
+          <td>{{ line.total_minor | money }}</td>
+        </tr>
+        {% if line.calc_trace %}
+          <tr class="explain">
+            <td colspan="7">
+              <details>
+                <summary class="small">Calculation trace</summary>
+                <ol class="explain-list">
+                  {% for step in line.calc_trace %}
+                    <li><span>{{ step.label }}</span><span>{{ step.amount_minor | money }}</span></li>
+                  {% endfor %}
+                </ol>
+              </details>
+            </td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr><td colspan="5"></td><th>Subtotal</th><td>{{ invoice.subtotal_minor | money }}</td></tr>
+      {% if invoice.discount_minor %}
+      <tr><td colspan="5"></td><th>Discount</th><td>({{ invoice.discount_minor | money }})</td></tr>
+      {% endif %}
+      <tr><td colspan="5"></td><th>Tax</th><td>{{ invoice.tax_minor | money }}</td></tr>
+      <tr><td colspan="5"></td><th>Total</th><td><strong>{{ invoice.total_minor | money }}</strong></td></tr>
+      <tr><td colspan="5"></td><th>Paid</th><td>{{ invoice.amount_paid_minor | money }}</td></tr>
+      <tr><td colspan="5"></td><th>Outstanding</th><td><strong>{{ (invoice.total_minor - invoice.amount_paid_minor) | money }}</strong></td></tr>
+    </tfoot>
+  </table>
+</section>
+
+<section class="section">
+  <h2 class="section-label">&sect; 2 &nbsp; Actions</h2>
+  <div>
+    <a href="/app/invoices/{{ invoice.id }}/print" class="button" id="invoice-print-btn" target="_blank">Print</a>
+
+    {% if invoice.status == "draft" %}
+      <form method="post" action="/app/invoices/{{ invoice.id }}/confirm" class="form">
+        <button class="button primary" type="submit" id="invoice-confirm-btn">Confirm</button>
+      </form>
+      <form method="post" action="/app/invoices/{{ invoice.id }}/cancel" class="form">
+        <input type="hidden" name="reason" value="cancelled by staff">
+        <button class="button destructive" type="submit" id="invoice-cancel-btn">Cancel</button>
+      </form>
+    {% endif %}
+
+    {% if invoice.status == "confirmed" %}
+      <form method="post" action="/app/invoices/{{ invoice.id }}/send" class="form">
+        <button class="button" type="submit" id="invoice-send-btn">Send to Customer</button>
+      </form>
+      <form method="post" action="/app/invoices/{{ invoice.id }}/cancel" class="form">
+        <input type="hidden" name="reason" value="cancelled by staff">
+        <button class="button destructive" type="submit" id="invoice-cancel-draft-btn">Cancel</button>
+      </form>
+    {% endif %}
+  </div>
+
+  {% if invoice.status == "confirmed" %}
+  <h3 class="section-label">&sect; 2.1 &nbsp; Record Payment</h3>
+  <form method="post" action="/app/payments/record" class="form">
+    <input type="hidden" name="invoice_id" value="{{ invoice.id }}">
+    <label class="field">
+      <span>Method</span>
+      <select name="method" id="pay-method">
+        <option value="bank_transfer">Bank Transfer</option>
+        <option value="upi">UPI</option>
+        <option value="cash">Cash</option>
+        <option value="card">Card</option>
+        <option value="cheque">Cheque</option>
+        <option value="other">Other</option>
+      </select>
+    </label>
+    <label class="field">
+      <span>Amount ({{ currency }})</span>
+      <input type="text" name="amount" id="pay-amount" required placeholder="0.00">
+    </label>
+    <label class="field">
+      <span>Date</span>
+      <input type="date" name="paid_on" id="pay-date" required value="{{ system_date }}">
+    </label>
+    <label class="field">
+      <span>Note</span>
+      <input type="text" name="note" id="pay-note" placeholder="Reference / UTR">
+    </label>
+    <button class="button primary" type="submit" id="pay-submit-btn">Record Payment</button>
+  </form>
+  {% endif %}
+</section>
+
+{% if invoice.payments %}
+<section class="section">
+  <h2 class="section-label">&sect; 3 &nbsp; Payments</h2>
+  <table class="ledger-table">
+    <thead>
+      <tr><th>Date</th><th>Method</th><th>Amount ({{ currency }})</th><th>Note</th></tr>
+    </thead>
+    <tbody>
+      {% for p in invoice.payments %}
+        <tr>
+          <td>{{ p.paid_on }}</td>
+          <td>{{ p.method }}</td>
+          <td>{{ p.amount_minor | money }}</td>
+          <td>{{ p.note or "" }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}
