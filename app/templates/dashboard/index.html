@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="sheet">
+  <div class="masthead">
+    <div class="brand">
+      <span class="section-label">Finance &amp; Operations</span>
+      <h1>Executive Dashboard</h1>
+    </div>
+  </div>
+
+  <div class="content">
+    <section class="section">
+      <h2 class="section-label">&sect; 1 &nbsp; Key Performance Indicators</h2>
+      <div class="leaders">
+        <div class="field">
+          <span>Active Subscriptions</span>
+          <strong>{{ active_count }}</strong>
+        </div>
+        <div class="field">
+          <span>Monthly Recurring Revenue (MRR)</span>
+          <strong>{{ mrr | money }}</strong>
+        </div>
+        <div class="field">
+          <span>Total Collected</span>
+          <strong>{{ collected | money }}</strong>
+        </div>
+        <div class="field">
+          <span>Total Outstanding</span>
+          <strong>{{ outstanding | money }}</strong>
+        </div>
+        <div class="field">
+          <span>Overdue Count</span>
+          <strong>{{ overdue_count }}</strong>
+        </div>
+        <div class="field">
+          <span>Overdue Amount</span>
+          <strong>{{ overdue_amount | money }}</strong>
+        </div>
+      </div>
+    </section>
+
+    {% if revenue_by_month %}
+    <section class="section">
+      <h2 class="section-label">&sect; 2 &nbsp; Monthly Billed Revenue</h2>
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th class="num">Billed Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in revenue_by_month %}
+          <tr>
+            <td>{{ row.month }}</td>
+            <td class="num">{{ row.revenue | money }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

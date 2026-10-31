@@ -99,3 +99,11 @@ Append-only, newest at the bottom. Format: BUILD_PLAN §6.
 - Decisions: None.
 - Tests: `make check` -> `162 passed, 1 warning in 21.76s`.
 - Next: A-16 e2e test `tests/e2e/test_month.py` (the G2 path).
+
+## 2026-10-31 16:13 IST — A — A-16 — DONE
+- Did: Implemented `tests/e2e/test_month.py` covering the complete G2 end-to-end lifecycle over HTTP: public customer signup, portal verification, catalog setup (tax via `/app/catalog/taxes/new`, product, plan, confirmed subscription), daily automated activation transition, live billing run with immediate invoice generation, idempotency re-run proving 0 duplicates, invoice confirmation, payment recording via `/app/payments/record`, customer portal invoice inspection, executive dashboard rendering with KPI leaders and monthly billing table, and assertion that all invariants (INV-01..INV-08) remain completely green.
+- Files: `tests/e2e/test_month.py`, `app/templates/dashboard/index.html`, `docs/tasks/a.md`, `docs/log/a.md`.
+- Contract changes: none.
+- Decisions: None.
+- Tests: `make check` -> `163 passed, 1 warning in 23.55s`.
+- Next: A-17 documentation, README finalization, JUDGE_QA.md, and freeze readiness.
