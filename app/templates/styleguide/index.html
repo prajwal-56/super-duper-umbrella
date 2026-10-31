@@ -1,0 +1,351 @@
+{# Styleguide — Counting House Ledger Design System
+   Owner: C (KStupid)
+   Standalone page (does NOT extend base.html — it carries its own shell so it works
+   before A finishes the layout). Once base.html exists, this can optionally extend it.
+#}
+{% from "_ui.html" import stamp, ledger_table, field, select_field, textarea_field,
+   checkbox_field, button, leaders, stepper, explain, pagination, section_head,
+   flash_messages, confirm_box, empty_state, detail_block, detail_row, filter_bar, amount %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Styleguide — Brightloop Ledger</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/ledger.css">
+</head>
+<body>
+
+<div class="page-sheet">
+
+  {# ---- HEADER ---- #}
+  <header class="ledger-header">
+    <h1 class="ledger-header__title">Brightloop Ledger</h1>
+    <nav class="ledger-header__nav">
+      <a href="/styleguide" class="active">Styleguide</a>
+    </nav>
+    <div class="ledger-header__meta">
+      <strong>Dev</strong> · admin<br>
+      System date: 31 Oct 2026
+    </div>
+  </header>
+
+  {# ---- CLOCK LINE ---- #}
+  <div class="clock-line clock-line--real">
+    System date 31 Oct 2026
+  </div>
+  <div class="clock-line clock-line--simulated">
+    System date 14 Nov 2026 (simulated)
+  </div>
+
+  <div class="content">
+
+    {# ============================================================= #}
+    {{ section_head("1", "Typography") }}
+
+    <h1>Heading 1 — Source Serif 4 Small Caps</h1>
+    <h2>Heading 2 — Section Title</h2>
+    <h3>Heading 3 — Sub-section</h3>
+    <p>Body text in IBM Plex Mono 13px. This is the <a href="#">standard hyperlink style</a> in entry-blue with an underline. Numerals are tabular: 1,23,456.00 — negatives in <span class="amount-negative">(1,23,456.00)</span> margin-red.</p>
+    <p class="text-soft">Soft text for secondary information and metadata.</p>
+
+    {# ============================================================= #}
+    {{ section_head("2", "Stamps") }}
+
+    <div class="mb-2">
+      {{ stamp("draft") }}
+      {{ stamp("quotation") }}
+      {{ stamp("confirmed") }}
+      {{ stamp("active") }}
+      {{ stamp("closed") }}
+      {{ stamp("paid") }}
+      {{ stamp("ok") }}
+      {{ stamp("completed") }}
+      {{ stamp("overdue") }}
+      {{ stamp("cancelled") }}
+      {{ stamp("void") }}
+      {{ stamp("failed") }}
+      {{ stamp("running") }}
+      {{ stamp("paused") }}
+    </div>
+
+    <p class="text-soft mt-1">Billing run dispositions:</p>
+    <div class="mb-2">
+      {{ stamp("billed") }}
+      {{ stamp("up_to_date") }}
+      {{ stamp("skipped_paused") }}
+      {{ stamp("skipped_period_voided") }}
+      {{ stamp("deferred_locked") }}
+    </div>
+
+    {# ============================================================= #}
+    {{ section_head("3", "Ledger Table") }}
+
+    {% call(caller) ledger_table(
+      ["Date", "Description", "Customer", ("Debit (INR)", "col-amount"), ("Credit (INR)", "col-amount"), ("Balance (INR)", "col-amount")],
+      total_row=["", "", "Total", ("15,67,200.00", "col-amount"), ("4,50,000.00", "col-amount"), ("11,17,200.00", "col-amount")]
+    ) %}
+      <tr class="row-link" onclick="void(0)">
+        <td>01 Nov 2026</td>
+        <td>INV-2026-000142 — ERP Suite (Odoo)</td>
+        <td>Mehta Trading Co.</td>
+        <td class="col-amount">5,55,900.00</td>
+        <td class="col-amount">—</td>
+        <td class="col-amount">5,55,900.00</td>
+      </tr>
+      <tr>
+        <td>01 Nov 2026</td>
+        <td>INV-2026-000143 — CRM + Analytics</td>
+        <td>Sharma Exports Pvt. Ltd.</td>
+        <td class="col-amount">3,24,800.00</td>
+        <td class="col-amount">—</td>
+        <td class="col-amount">8,80,700.00</td>
+      </tr>
+      <tr>
+        <td>05 Nov 2026</td>
+        <td>PMT-000087 — Bank transfer</td>
+        <td>Mehta Trading Co.</td>
+        <td class="col-amount">—</td>
+        <td class="col-amount">4,50,000.00</td>
+        <td class="col-amount">4,30,700.00</td>
+      </tr>
+      <tr>
+        <td>15 Nov 2026</td>
+        <td>INV-2026-000151 — Books + Support</td>
+        <td>Gupta Enterprises</td>
+        <td class="col-amount">6,86,500.00</td>
+        <td class="col-amount">—</td>
+        <td class="col-amount">11,17,200.00</td>
+      </tr>
+    {% endcall %}
+
+    <p class="text-soft">Table with negative amounts:</p>
+
+    {% call(caller) ledger_table(
+      ["Line", "Description", ("Amount (INR)", "col-amount")]
+    ) %}
+      <tr>
+        <td>1</td>
+        <td>ERP Suite — 3 seats</td>
+        <td class="col-amount">16,67,700.00</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Discount SEATS10 (10%)</td>
+        <td class="col-amount"><span class="amount-negative">(1,66,770.00)</span></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>GST 18% (exclusive)</td>
+        <td class="col-amount">2,70,167.00</td>
+      </tr>
+    {% endcall %}
+
+    <p class="text-soft">Empty table:</p>
+
+    {% call(caller) ledger_table(["Name", "Status", ("Amount (INR)", "col-amount")]) %}
+      <tr class="row-empty"><td colspan="3">No entries found. Create a subscription to get started.</td></tr>
+    {% endcall %}
+
+    {# ============================================================= #}
+    {{ section_head("4", "Leaders (Trial Balance Style)") }}
+
+    {{ leaders([
+      ("Active subscriptions", "142", "/app/subscriptions?status=active"),
+      ("MRR (INR)", "12,34,500.00"),
+      ("Collected this month (INR)", "8,45,200.00"),
+      ("Outstanding (INR)", "3,89,300.00", "/app/overdue"),
+      ("Overdue invoices", "7", "/app/overdue")
+    ]) }}
+
+    {# ============================================================= #}
+    {{ section_head("5", "Form Fields") }}
+
+    <form action="#" method="post" style="max-width: 36rem;">
+      <div class="field-row">
+        {{ field("customer_name", "Customer name", required=true, value="Mehta Trading Co.") }}
+        {{ field("email", "Email", type="email", placeholder="billing@example.com") }}
+      </div>
+
+      <div class="field-row">
+        {{ field("quantity", "Quantity", type="number", value="5") }}
+        {{ field("start_date", "Start date", type="date", value="2026-11-01") }}
+      </div>
+
+      {{ select_field("plan_id", "Billing plan", [
+        ("1", "Monthly — Standard"),
+        ("2", "Yearly — Premium"),
+        ("3", "Weekly — Trial"),
+      ], selected="1") }}
+
+      {{ textarea_field("notes", "Notes", value="Renewal pending approval from finance team.", rows=3) }}
+
+      {{ field("password", "Password", type="password", error="Must be more than 8 characters with uppercase, lowercase, and a special character.") }}
+
+      <div class="field-row">
+        {{ checkbox_field("auto_close", "Auto-close at expiry", checked=true) }}
+        {{ checkbox_field("allow_pause", "Allow pause") }}
+        {{ checkbox_field("allow_renew", "Allow renew", checked=true) }}
+      </div>
+
+      <div class="btn-group mt-2">
+        {{ button("Save entry", type="submit", variant="primary") }}
+        {{ button("Cancel", href="#") }}
+        {{ button("Cannot edit", disabled=true) }}
+      </div>
+    </form>
+
+    {# ============================================================= #}
+    {{ section_head("6", "Buttons") }}
+
+    <div class="mb-2">
+      {{ button("Default") }}
+      {{ button("Primary", variant="primary") }}
+      {{ button("Destructive", variant="destructive") }}
+      {{ button("Disabled", disabled=true) }}
+    </div>
+    <div class="mb-2">
+      {{ button("Link button", href="#") }}
+      {{ button("Submit", type="submit", variant="primary") }}
+    </div>
+
+    {# ============================================================= #}
+    {{ section_head("7", "Stepper (Lifecycle)") }}
+
+    {{ stepper("active", [
+      {"status": "draft", "date": "25 Oct 2026", "done": true},
+      {"status": "quotation", "date": "26 Oct 2026", "done": true},
+      {"status": "confirmed", "date": "28 Oct 2026", "done": true},
+      {"status": "active", "date": "01 Nov 2026", "done": false},
+      {"status": "closed", "done": false}
+    ]) }}
+
+    <p class="text-soft mt-1">Closed subscription:</p>
+    {{ stepper("closed", [
+      {"status": "draft", "date": "10 Sep 2026", "done": true},
+      {"status": "confirmed", "date": "10 Sep 2026", "done": true},
+      {"status": "active", "date": "15 Sep 2026", "done": true},
+      {"status": "closed", "date": "30 Oct 2026", "done": true}
+    ]) }}
+
+    {# ============================================================= #}
+    {{ section_head("8", "Explain (Calculation Trace)") }}
+
+    {{ explain([
+      {"label": "Product price", "amount_minor": 499900},
+      {"label": "Variant: Brand = Odoo", "amount_minor": 56000},
+      {"label": "Unit price", "amount_minor": 555900},
+      {"label": "x 3 seats", "amount_minor": 1667700},
+      {"label": "Discount SEATS10 (10%)", "amount_minor": -166770},
+      {"label": "Net", "amount_minor": 1500930},
+      {"label": "GST 18% (exclusive)", "amount_minor": 270167},
+      {"label": "Line total", "amount_minor": 1771097}
+    ]) }}
+
+    {# ============================================================= #}
+    {{ section_head("9", "Pagination") }}
+
+    {{ pagination(1, 41, "/app/invoices") }}
+    {{ pagination(3, 41, "/app/invoices") }}
+    {{ pagination(41, 41, "/app/invoices") }}
+
+    {# ============================================================= #}
+    {{ section_head("10", "Flash Messages") }}
+
+    {{ flash_messages([
+      {"category": "success", "message": "Invoice INV-2026-000142 confirmed and number assigned."},
+      {"category": "error", "message": "Cannot cancel: invoice has 2 payments recorded."},
+      {"category": "info", "message": "Billing run completed: 142 subscriptions considered, 138 invoices created."}
+    ]) }}
+
+    {# ============================================================= #}
+    {{ section_head("11", "Confirm Box") }}
+
+    {% call confirm_box("Cancel invoice INV-2026-000142?", "This action cannot be undone. The invoice will be voided, discount redemptions released, and the billing run will record this period as skipped_period_voided.") %}
+      <div class="btn-group">
+        {{ button("Confirm cancellation", type="submit", variant="destructive") }}
+        {{ button("Go back", href="#") }}
+      </div>
+    {% endcall %}
+
+    {# ============================================================= #}
+    {{ section_head("12", "Empty State") }}
+
+    {{ empty_state("No invoices found.", "Create a subscription and run billing to generate invoices.") }}
+
+    {# ============================================================= #}
+    {{ section_head("13", "Detail Block") }}
+
+    {% call detail_block() %}
+      {{ detail_row("Subscription", "SUB-000042") }}
+      {{ detail_row("Customer", "Mehta Trading Co.") }}
+      {{ detail_row("Plan", "Monthly — Standard") }}
+      {{ detail_row("Status", stamp("active")) }}
+      {{ detail_row("Start date", "01 Nov 2026") }}
+      {{ detail_row("Expiry date", "31 Oct 2027") }}
+      {{ detail_row("Payment terms", "Net 30") }}
+    {% endcall %}
+
+    {# ============================================================= #}
+    {{ section_head("14", "Filter Bar") }}
+
+    {% call filter_bar(action="/app/subscriptions", method="get") %}
+      {{ field("search", "Search", placeholder="SUB-000042 or customer name") }}
+      {{ select_field("status", "Status", [
+        ("active", "Active"),
+        ("draft", "Draft"),
+        ("closed", "Closed")
+      ], blank_label="All statuses") }}
+      {{ button("Filter", type="submit") }}
+    {% endcall %}
+
+    {# ============================================================= #}
+    {{ section_head("15", "Amount Display") }}
+
+    <p>
+      Positive: {{ amount(155900) }}<br>
+      Negative: {{ amount(-42350) }}<br>
+      Zero: {{ amount(0) }}
+    </p>
+
+    {# ============================================================= #}
+    {{ section_head("16", "Colour Tokens") }}
+
+    <div class="mb-3">
+      {% set tokens = [
+        ("--paper", "#ECE5D0", "Page background"),
+        ("--paper-deep", "#E2DAC1", "Field focus, hover rows"),
+        ("--ink", "#1C1B17", "Primary text, rules"),
+        ("--ink-soft", "#55524A", "Secondary text, metadata"),
+        ("--rule", "#1C1B17", "Table rules, borders"),
+        ("--rule-faint", "#B9B196", "Faint row separators"),
+        ("--margin-red", "#A8322A", "Margin rule, errors, overdue, destructive"),
+        ("--stamp-green", "#2E5E3E", "Paid, active, ok"),
+        ("--entry-blue", "#23405E", "Links, typed entries"),
+      ] %}
+      {% call(caller) ledger_table(["Token", "Hex", "Usage", "Swatch"]) %}
+        {% for name, hex, usage in tokens %}
+        <tr>
+          <td><code>{{ name }}</code></td>
+          <td><code>{{ hex }}</code></td>
+          <td>{{ usage }}</td>
+          <td><span style="display:inline-block;width:3rem;height:1.2rem;background:{{ hex }};border:1px solid var(--rule);"></span></td>
+        </tr>
+        {% endfor %}
+      {% endcall %}
+    </div>
+
+  </div>{# /.content #}
+
+  {# ---- FOOTER ---- #}
+  <footer class="ledger-footer">
+    Folio /styleguide · set in 2 ms
+  </footer>
+
+</div>{# /.page-sheet #}
+
+</body>
+</html>

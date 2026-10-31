@@ -1,0 +1,371 @@
+{# =============================================================
+   BRIGHTLOOP LEDGER — UI Macro Library (_ui.html)
+   Owner: C (KStupid)
+   Every page uses these macros. No inline styles. No JS.
+   ============================================================= #}
+
+
+{# ---- STAMP ----
+   Usage: {{ stamp("active") }}
+   Maps status text to the correct CSS modifier class.
+#}
+{% macro stamp(status) -%}
+{%- set s = status | lower | replace(' ', '_') -%}
+{%- set cls_map = {
+  'draft': 'draft',
+  'quotation': 'quotation',
+  'confirmed': 'confirmed',
+  'active': 'active',
+  'closed': 'closed',
+  'paid': 'paid',
+  'ok': 'ok',
+  'completed': 'completed',
+  'overdue': 'overdue',
+  'cancelled': 'cancelled',
+  'void': 'void',
+  'failed': 'failed',
+  'running': 'running',
+  'paused': 'paused',
+  'billed': 'active',
+  'up_to_date': 'ok',
+  'skipped_paused': 'paused',
+  'skipped_period_voided': 'cancelled',
+  'deferred_locked': 'draft',
+} -%}
+<span class="stamp stamp--{{ cls_map.get(s, 'draft') }}">{{ status | upper }}</span>
+{%- endmacro %}
+
+
+{# ---- LEDGER TABLE ----
+   Usage:
+     {% call ledger_table(["Name", "Plan", ("Amount (INR)", "col-amount")]) %}
+       <tr><td>...</td><td>...</td><td class="col-amount">1,234.00</td></tr>
+     {% endcall %}
+
+   Pass column headers as strings or tuples of (label, extra_class).
+   The caller() block provides <tr> rows for the tbody.
+   total_row: optional list of cell values for the total row.
+   empty_msg: shown if no data rows exist (caller returns empty).
+#}
+{% macro ledger_table(headers, total_row=none, empty_msg="No entries yet.") -%}
+<div class="table-wrap">
+  <table class="ledger-table">
+    <thead>
+      <tr>
+        {%- for h in headers %}
+        {%- if h is string %}
+        <th>{{ h }}</th>
+        {%- else %}
+        <th class="{{ h[1] }}">{{ h[0] }}</th>
+        {%- endif %}
+        {%- endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {{ caller() }}
+      {%- if total_row is not none %}
+      <tr class="row-total">
+        {%- for cell in total_row %}
+        {%- if cell is string %}
+        <td>{{ cell }}</td>
+        {%- else %}
+        <td class="{{ cell[1] }}">{{ cell[0] }}</td>
+        {%- endif %}
+        {%- endfor %}
+      </tr>
+      {%- endif %}
+    </tbody>
+  </table>
+</div>
+{%- endmacro %}
+
+
+{# ---- FIELD (text, email, password, number, date) ----
+   Usage: {{ field("email", "Email address", type="email", required=true, value=form.email) }}
+#}
+{% macro field(name, label, type="text", value="", required=false, placeholder="", error="", readonly=false, help="") -%}
+<div class="field">
+  <label class="field__label" for="field-{{ name }}">{{ label }}{% if required %} *{% endif %}</label>
+  <input
+    class="field__input"
+    type="{{ type }}"
+    id="field-{{ name }}"
+    name="{{ name }}"
+    value="{{ value }}"
+    {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+    {% if required %}required{% endif %}
+    {% if readonly %}readonly{% endif %}
+  >
+  {%- if error %}
+  <div class="field__error">{{ error }}</div>
+  {%- endif %}
+  {%- if help %}
+  <div class="text-soft" style="font-size: 11px; margin-top: 0.15rem;">{{ help }}</div>
+  {%- endif %}
+</div>
+{%- endmacro %}
+
+
+{# ---- SELECT FIELD ----
+   Usage: {{ select_field("plan_id", "Plan", options, selected=form.plan_id) }}
+   options: list of dicts with 'value' and 'label' keys, or list of (value, label) tuples.
+#}
+{% macro select_field(name, label, options, selected="", required=false, error="", blank_label="— Select —") -%}
+<div class="field">
+  <label class="field__label" for="field-{{ name }}">{{ label }}{% if required %} *{% endif %}</label>
+  <select class="field__select" id="field-{{ name }}" name="{{ name }}" {% if required %}required{% endif %}>
+    {%- if blank_label %}
+    <option value="">{{ blank_label }}</option>
+    {%- endif %}
+    {%- for opt in options %}
+    {%- if opt is mapping %}
+    <option value="{{ opt.value }}" {% if opt.value|string == selected|string %}selected{% endif %}>{{ opt.label }}</option>
+    {%- else %}
+    <option value="{{ opt[0] }}" {% if opt[0]|string == selected|string %}selected{% endif %}>{{ opt[1] }}</option>
+    {%- endif %}
+    {%- endfor %}
+  </select>
+  {%- if error %}
+  <div class="field__error">{{ error }}</div>
+  {%- endif %}
+</div>
+{%- endmacro %}
+
+
+{# ---- TEXTAREA FIELD ----
+   Usage: {{ textarea_field("notes", "Notes", value=form.notes, rows=4) }}
+#}
+{% macro textarea_field(name, label, value="", required=false, error="", rows=4, placeholder="") -%}
+<div class="field">
+  <label class="field__label" for="field-{{ name }}">{{ label }}{% if required %} *{% endif %}</label>
+  <textarea
+    class="field__textarea"
+    id="field-{{ name }}"
+    name="{{ name }}"
+    rows="{{ rows }}"
+    {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+    {% if required %}required{% endif %}
+  >{{ value }}</textarea>
+  {%- if error %}
+  <div class="field__error">{{ error }}</div>
+  {%- endif %}
+</div>
+{%- endmacro %}
+
+
+{# ---- CHECKBOX FIELD ----
+   Usage: {{ checkbox_field("auto_close", "Auto-close", checked=plan.auto_close) }}
+#}
+{% macro checkbox_field(name, label, checked=false, value="true", error="") -%}
+<div class="field field--inline">
+  <input class="field__input" type="checkbox" id="field-{{ name }}" name="{{ name }}" value="{{ value }}" {% if checked %}checked{% endif %}>
+  <label class="field__label" for="field-{{ name }}">{{ label }}</label>
+  {%- if error %}
+  <div class="field__error">{{ error }}</div>
+  {%- endif %}
+</div>
+{%- endmacro %}
+
+
+{# ---- BUTTON ----
+   Usage: {{ button("Save", type="submit") }}
+          {{ button("Delete", variant="destructive") }}
+          {{ button("View", href="/path", variant="default") }}
+#}
+{% macro button(text, type="button", variant="default", href="", disabled=false, name="", value="") -%}
+{%- set cls = "btn" -%}
+{%- if variant == "primary" %}{% set cls = cls ~ " btn--primary" %}{% endif -%}
+{%- if variant == "destructive" %}{% set cls = cls ~ " btn--destructive" %}{% endif -%}
+{%- if disabled %}{% set cls = cls ~ " btn--disabled" %}{% endif -%}
+{%- if href %}
+<a class="{{ cls }}" href="{{ href }}"{% if disabled %} aria-disabled="true"{% endif %}>{{ text }}</a>
+{%- else %}
+<button class="{{ cls }}" type="{{ type }}" {% if disabled %}disabled{% endif %} {% if name %}name="{{ name }}" value="{{ value }}"{% endif %}>{{ text }}</button>
+{%- endif %}
+{%- endmacro %}
+
+
+{# ---- LEADERS (label ... value) ----
+   Usage: {{ leaders([("Active subscriptions", "142"), ("MRR (INR)", "12,34,500.00", "/app/subscriptions?status=active")]) }}
+   items: list of (label, value) or (label, value, link_href) tuples.
+#}
+{% macro leaders(items) -%}
+<div class="leaders">
+  {%- for item in items %}
+  <div class="leaders__row">
+    <span class="leaders__label">{{ item[0] }}</span>
+    <span class="leaders__dots"></span>
+    <span class="leaders__value">
+      {%- if item | length > 2 and item[2] %}
+      <a href="{{ item[2] }}">{{ item[1] }}</a>
+      {%- else %}
+      {{ item[1] }}
+      {%- endif %}
+    </span>
+  </div>
+  {%- endfor %}
+</div>
+{%- endmacro %}
+
+
+{# ---- STEPPER (lifecycle status display) ----
+   Usage: {{ stepper("active", steps) }}
+   steps: list of dicts with 'status', 'date' (optional), 'done' (bool).
+   current: the current status string.
+#}
+{% macro stepper(current, steps) -%}
+<div class="stepper">
+  {%- for step in steps %}
+  {%- if not loop.first %}
+  <span class="stepper__arrow">—</span>
+  {%- endif %}
+  <div class="stepper__step {% if step.status|lower == current|lower %}stepper__step--current{% elif step.done %}stepper__step--done{% endif %}">
+    {{ stamp(step.status) }}
+    {%- if step.date %}
+    <span class="stepper__date">{{ step.date }}</span>
+    {%- endif %}
+  </div>
+  {%- endfor %}
+</div>
+{%- endmacro %}
+
+
+{# ---- EXPLAIN (calc_trace waterfall) ----
+   Usage: {{ explain(line.calc_trace, line_id=line.id) }}
+   trace: list of dicts with 'label' and 'amount_minor' keys.
+#}
+{% macro explain(trace, line_id="", money_fmt=none) -%}
+<details>
+  <summary class="explain-trigger">Explain</summary>
+  <ul class="explain-waterfall">
+    {%- for step in trace %}
+    <li>
+      <span class="explain-waterfall__label">{{ step.label }}</span>
+      <span class="explain-waterfall__amount {% if step.amount_minor < 0 %}amount-negative{% endif %}">
+        {%- if money_fmt %}{{ money_fmt(step.amount_minor) }}{% else %}{{ "%.2f" | format(step.amount_minor / 100) }}{% endif -%}
+      </span>
+    </li>
+    {%- endfor %}
+  </ul>
+</details>
+{%- endmacro %}
+
+
+{# ---- PAGINATION ----
+   Usage: {{ pagination(page=3, total_pages=41, base_url="/app/invoices") }}
+#}
+{% macro pagination(page, total_pages, base_url, query_params="") -%}
+{%- if total_pages > 1 %}
+<div class="pagination">
+  {%- set sep = "&" if "?" in base_url else "?" %}
+  {%- if page > 1 %}
+  <a href="{{ base_url }}{{ sep }}page={{ page - 1 }}{{ query_params }}">‹ Prev</a>
+  {%- else %}
+  <span class="pagination__disabled">‹ Prev</span>
+  {%- endif %}
+  <span class="pagination__current">Page {{ page }} of {{ total_pages }}</span>
+  {%- if page < total_pages %}
+  <a href="{{ base_url }}{{ sep }}page={{ page + 1 }}{{ query_params }}">Next ›</a>
+  {%- else %}
+  <span class="pagination__disabled">Next ›</span>
+  {%- endif %}
+</div>
+{%- endif %}
+{%- endmacro %}
+
+
+{# ---- SECTION HEAD ----
+   Usage: {{ section_head("3", "Subscriptions") }}
+#}
+{% macro section_head(number, title) -%}
+<div class="section-head">
+  <span class="section-head__label">§ {{ number }}  {{ title }}</span>
+</div>
+{%- endmacro %}
+
+
+{# ---- FLASH MESSAGES ----
+   Usage: {{ flash_messages(messages) }}
+   messages: list of dicts with 'category' and 'message' keys.
+#}
+{% macro flash_messages(messages) -%}
+{%- for msg in messages %}
+<div class="flash flash--{{ msg.category | default('info') }}">
+  {{ msg.message }}
+</div>
+{%- endfor %}
+{%- endmacro %}
+
+
+{# ---- CONFIRM BOX ----
+   Usage:
+     {{ confirm_box("Cancel this invoice?", "This action cannot be undone. The invoice will be voided and any discount redemptions released.") }}
+#}
+{% macro confirm_box(title, body) -%}
+<div class="confirm-box">
+  <h3 class="confirm-box__title">{{ title }}</h3>
+  <div class="confirm-box__body">{{ body }}</div>
+  {{ caller() }}
+</div>
+{%- endmacro %}
+
+
+{# ---- EMPTY STATE ----
+   Usage: {{ empty_state("No invoices found.", "Create a subscription to generate invoices.") }}
+#}
+{% macro empty_state(message, action_hint="") -%}
+<div class="empty-state">
+  <p>{{ message }}</p>
+  {%- if action_hint %}
+  <p>{{ action_hint }}</p>
+  {%- endif %}
+</div>
+{%- endmacro %}
+
+
+{# ---- DETAIL BLOCK (key-value pairs) ----
+   Usage:
+     {% call detail_block() %}
+       {{ detail_row("Customer", sub.customer_name) }}
+       {{ detail_row("Status", stamp(sub.status)) }}
+     {% endcall %}
+#}
+{% macro detail_block() -%}
+<dl class="detail-block">
+  {{ caller() }}
+</dl>
+{%- endmacro %}
+
+{% macro detail_row(label, value) -%}
+<dt>{{ label }}</dt>
+<dd>{{ value }}</dd>
+{%- endmacro %}
+
+
+{# ---- FILTER BAR ----
+   Usage:
+     {% call filter_bar(action="/app/subscriptions", method="get") %}
+       {{ field("search", "Search", value=filters.search) }}
+       {{ select_field("status", "Status", status_options, selected=filters.status) }}
+       {{ button("Filter", type="submit") }}
+     {% endcall %}
+#}
+{% macro filter_bar(action="", method="get") -%}
+<form class="filter-bar" action="{{ action }}" method="{{ method }}">
+  {{ caller() }}
+</form>
+{%- endmacro %}
+
+
+{# ---- AMOUNT DISPLAY ----
+   Formats a minor-unit integer amount for display, with parentheses for negatives.
+   Usage: {{ amount(line.total_minor) }}
+   Note: Prefer using the server-side money.fmt() via a Jinja global. This is a fallback.
+#}
+{% macro amount(value_minor, negative_class="amount-negative") -%}
+{%- if value_minor < 0 -%}
+<span class="{{ negative_class }}">({{ "%.2f" | format((-value_minor) / 100) }})</span>
+{%- else -%}
+{{ "%.2f" | format(value_minor / 100) }}
+{%- endif -%}
+{%- endmacro %}
