@@ -63,10 +63,17 @@ def _bad_origin(request: Request) -> bool:
     origin = request.headers.get("origin")
     referer = request.headers.get("referer")
     base = settings.app_base_url
+    allowed = {base}
+    # Local development convenience: allow 127.0.0.1 and localhost interchangeably
+    if "://localhost:" in base:
+        allowed.add(base.replace("://localhost:", "://127.0.0.1:"))
+    elif "://127.0.0.1:" in base:
+        allowed.add(base.replace("://127.0.0.1:", "://localhost:"))
+
     if origin:
-        return not origin.startswith(base)
+        return not any(origin.startswith(a) for a in allowed)
     if referer:
-        return not referer.startswith(base)
+        return not any(referer.startswith(a) for a in allowed)
     return False  # non-browser clients (curl, tests) send neither
 
 
