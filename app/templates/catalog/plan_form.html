@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from "_ui.html" import field, select_field, checkbox_field, button %}
+{% block title %}{{ "Edit" if plan else "New" }} Plan · Catalog · Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; {{ "Edit plan" if plan else "New plan" }}</h1>
+
+  {% if errors is defined and errors %}
+    <div class="errors">
+      {% for e in errors %}<p class="error">{{ e }}</p>{% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post"
+        action="{{ '/app/catalog/plans/' ~ plan.id ~ '/edit' if plan else '/app/catalog/plans/new' }}"
+        class="form" id="plan-form">
+
+    {{ field("Name", "name",
+             name if name is defined else (plan.name if plan else ""),
+             required=true, id="plan-name") }}
+
+    {{ field("Plan fee (INR)", "price",
+             price if price is defined
+             else (plan.price_minor | money if plan else "0.00"),
+             placeholder="0.00 (0 = no plan fee)",
+             hint="If > 0, a 'Plan fee' line is added to every invoice.",
+             id="plan-price") }}
+
+    {{ select_field("Billing interval", "billing_interval",
+                     [("day","Day"),("week","Week"),("month","Month"),("year","Year")],
+                     billing_interval if billing_interval is defined
+                     else (plan.billing_interval if plan else "month"),
+                     id="plan-interval") }}
+
+    {{ field("Interval count", "interval_count",
+             interval_count if interval_count is defined
+             else (plan.interval_count if plan else "1"),
+             type="number", hint="e.g. 3 with Month = quarterly billing",
+             id="plan-interval-count") }}
+
+    {{ field("Minimum quantity per line", "min_quantity",
+             min_quantity if min_quantity is defined
+             else (plan.min_quantity if plan else "1"),
+             type="number", id="plan-min-qty") }}
+
+    {{ field("Available from", "available_from",
+             available_from if available_from is defined
+             else (plan.available_from | string if plan and plan.available_from else ""),
+             type="date", hint="Leave blank for no start restriction",
+             id="plan-avail-from") }}
+
+    {{ field("Available to", "available_to",
+             available_to if available_to is defined
+             else (plan.available_to | string if plan and plan.available_to else ""),
+             type="date", hint="Leave blank for no end restriction",
+             id="plan-avail-to") }}
+
+    <fieldset>
+      <legend>Behaviour flags</legend>
+      {{ checkbox_field("Auto-close at expiry", "auto_close",
+                         auto_close if auto_close is defined
+                         else (plan.auto_close if plan else false),
+                         id="plan-auto-close") }}
+      {{ checkbox_field("Allow early close", "allow_early_close",
+                         allow_early_close if allow_early_close is defined
+                         else (plan.allow_early_close if plan else true),
+                         id="plan-early-close") }}
+      {{ checkbox_field("Allow pause", "allow_pause",
+                         allow_pause if allow_pause is defined
+                         else (plan.allow_pause if plan else true),
+                         id="plan-pause") }}
+      {{ checkbox_field("Allow renew", "allow_renew",
+                         allow_renew if allow_renew is defined
+                         else (plan.allow_renew if plan else true),
+                         id="plan-renew") }}
+    </fieldset>
+
+    {% if plan %}
+      {{ checkbox_field("Active", "active",
+                         active if active is defined else plan.active,
+                         id="plan-active") }}
+    {% endif %}
+
+    <div class="form-actions">
+      {{ button("Save", type="submit", variant="primary", id="plan-save") }}
+      <a href="/app/catalog/plans{% if plan %}/{{ plan.id }}{% endif %}" class="button">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

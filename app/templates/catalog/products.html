@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "_ui.html" import ledger_table, button, empty_state, stamp, amount %}
+{% block title %}Products · Catalog · Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; Products</h1>
+
+  {% if 'catalog:write' | can(user.role) %}
+    <p><a href="/app/catalog/products/new" class="button primary" id="new-product">+ New product</a></p>
+  {% endif %}
+
+  {% if products %}
+    <table class="ledger-table" id="products-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th class="num">Sales price (INR)</th>
+          <th>Tax</th>
+          <th class="num">Variants</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+        <tr>
+          <td><a href="/app/catalog/products/{{ p.id }}">{{ p.name }}</a></td>
+          <td>{{ p.type }}</td>
+          <td class="num">{{ p.sales_price_minor | money }}</td>
+          <td>{{ p.tax_name or "—" }}{% if p.tax_rate %} ({{ "%.1f"|format(p.tax_rate / 100) }}%){% endif %}</td>
+          <td class="num">{{ p.variant_count }}</td>
+          <td>{{ stamp("active" if p.active else "inactive") }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    {{ empty_state("No products yet", "Create products that can be added to subscription lines.") }}
+  {% endif %}
+
+  <p class="small"><a href="/app/catalog/taxes">Tax rules</a> <span class="sep">/</span> <a href="/app/catalog/terms">Payment terms</a> <span class="sep">/</span> <a href="/app/catalog/plans">Plans</a></p>
+</section>
+{% endblock %}

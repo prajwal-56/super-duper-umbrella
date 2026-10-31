@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "_ui.html" import field, button %}
+{% block title %}{{ "Edit" if term else "New" }} Term · Catalog · Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; {{ "Edit payment term" if term else "New payment term" }}</h1>
+
+  {% if errors is defined and errors %}
+    <div class="errors">
+      {% for e in errors %}<p class="error">{{ e }}</p>{% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post"
+        action="{{ '/app/catalog/terms/' ~ term.id if term else '/app/catalog/terms/new' }}"
+        class="form" id="term-form">
+
+    {{ field("Name", "name", name if name is defined else (term.name if term else ""),
+             required=true, placeholder="e.g. Net 30", id="term-name") }}
+
+    {{ field("Due days", "due_days",
+             due_days if due_days is defined else (term.due_days if term else ""),
+             type="number", required=true, placeholder="0", id="term-due-days") }}
+
+    <div class="form-actions">
+      {{ button("Save", type="submit", variant="primary", id="term-save") }}
+      <a href="/app/catalog/terms" class="button">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

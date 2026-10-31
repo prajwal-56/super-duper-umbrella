@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "_ui.html" import field, checkbox_field, button, flash_messages %}
+{% block title %}{{ "Edit" if tax else "New" }} Tax · Catalog · Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; {{ "Edit tax rule" if tax else "New tax rule" }}</h1>
+
+  {% if errors is defined and errors %}
+    <div class="errors">
+      {% for e in errors %}<p class="error">{{ e }}</p>{% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post"
+        action="{{ '/app/catalog/taxes/' ~ tax.id if tax else '/app/catalog/taxes/new' }}"
+        class="form" id="tax-form">
+
+    {{ field("Name", "name", name if name is defined else (tax.name if tax else ""),
+             required=true, id="tax-name") }}
+
+    {{ field("Rate (%)", "rate_percent",
+             rate_percent if rate_percent is defined
+             else ("%.2f"|format(tax.rate_bps / 100) if tax else ""),
+             placeholder="e.g. 18 for 18%", id="tax-rate") }}
+
+    {{ checkbox_field("Tax-inclusive pricing", "inclusive",
+                       inclusive if inclusive is defined else (tax.inclusive if tax else false),
+                       id="tax-inclusive") }}
+
+    {% if tax %}
+      {{ checkbox_field("Active", "active",
+                         active if active is defined else tax.active,
+                         id="tax-active") }}
+    {% endif %}
+
+    <div class="form-actions">
+      {{ button("Save", type="submit", variant="primary", id="tax-save") }}
+      <a href="/app/catalog/taxes" class="button">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% from "_ui.html" import detail_block, detail_row, stamp, button, field, select_field,
+                          ledger_table, empty_state, amount %}
+{% block title %}{{ plan.name }} · Plan · Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; Plan: {{ plan.name }}</h1>
+
+  {% set can_write = 'catalog:write' | can(user.role) %}
+
+  {{ detail_block() }}
+    {{ detail_row("Name", plan.name) }}
+    {{ detail_row("Billing", "Every " ~ plan.interval_count ~ " " ~ plan.billing_interval ~ ("s" if plan.interval_count > 1 else "")) }}
+    {{ detail_row("Plan fee", plan.price_minor | money if plan.price_minor else "None") }}
+    {{ detail_row("Min quantity", plan.min_quantity) }}
+    {{ detail_row("Available from", plan.available_from or "—") }}
+    {{ detail_row("Available to", plan.available_to or "—") }}
+    {{ detail_row("Auto-close", "Yes" if plan.auto_close else "No") }}
+    {{ detail_row("Allow early close", "Yes" if plan.allow_early_close else "No") }}
+    {{ detail_row("Allow pause", "Yes" if plan.allow_pause else "No") }}
+    {{ detail_row("Allow renew", "Yes" if plan.allow_renew else "No") }}
+    {{ detail_row("Status", stamp("active" if plan.active else "inactive")) }}
+  </dl>
+
+  {% if can_write %}
+    <p><a href="/app/catalog/plans/{{ plan.id }}/edit" class="button primary" id="edit-plan">Edit</a></p>
+  {% endif %}
+</section>
+
+{# ── Product price overrides ─────────────────────────────────────────── #}
+<section class="section">
+  <h2 class="section-label">&sect; Product price overrides</h2>
+
+  {% if overrides %}
+    <table class="ledger-table" id="plan-overrides-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th class="num">Override price (INR)</th>
+          {% if can_write %}<th></th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in overrides %}
+        <tr>
+          <td><a href="/app/catalog/products/{{ o.product_id }}">{{ o.product_name }}</a></td>
+          <td class="num">{{ o.price_minor | money }}</td>
+          {% if can_write %}
+          <td>
+            <form method="post" action="/app/catalog/plans/{{ plan.id }}/overrides/{{ o.product_id }}/delete"
+                  class="form">
+              {{ button("Remove", type="submit", variant="destructive") }}
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    {{ empty_state("No price overrides", "Override the default product price for this specific plan.") }}
+  {% endif %}
+
+  {% if can_write %}
+    {% if override_errors is defined and override_errors %}
+      <div class="errors">
+        {% for e in override_errors %}<p class="error">{{ e }}</p>{% endfor %}
+      </div>
+    {% endif %}
+    <form method="post" action="/app/catalog/plans/{{ plan.id }}/overrides"
+          class="form" id="add-plan-override-form">
+      <h3>Set price override</h3>
+      {% set product_options = [("", "— Select product —")] %}
+      {% for p in products %}
+        {% set _ = product_options.append((p.id | string, p.name)) %}
+      {% endfor %}
+      {{ select_field("Product", "product_id", product_options,
+                       o_product_id if o_product_id is defined else "",
+                       id="plan-override-product") }}
+      {{ field("Override price (INR)", "price",
+               o_price if o_price is defined else "",
+               placeholder="0.00", id="plan-override-price") }}
+      {{ button("Set override", type="submit", variant="primary", id="plan-override-save") }}
+    </form>
+  {% endif %}
+</section>
+
+<p class="small"><a href="/app/catalog/plans">&larr; Back to plans</a></p>
+{% endblock %}
