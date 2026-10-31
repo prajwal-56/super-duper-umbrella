@@ -1,6 +1,22 @@
-# Log — B (engine)
+# Agent B — Log
 
-Append-only, newest at the bottom. Format: BUILD_PLAN §6.
+## 2026-10-31 12:17 IST — B — B-01 — DONE
+- Did: Implemented anchor-relative period derivation with month-end clamping, leap year support, pauses, closed_on, and cap limit.
+- Files: app/domain/periods.py, tests/engine/test_periods.py, docs/log/b.md
+- Contract changes: none
+- Decisions: none
+- Tests: python3 -m pytest tests/engine/test_periods.py -> 6 passed in 0.11s
+- Next: B-02
+- Needs from others: none
+
+## 2026-10-31 13:02 IST — B — B-02 — DONE
+- Did: Implemented pure pricing engine matching §12 contract and types with D-02 half-up rounding, D-03 inclusive/exclusive tax, largest-remainder discount allocation, and calc_trace.
+- Files: app/domain/pricing.py, tests/engine/test_pricing.py, docs/log/b.md
+- Contract changes: none
+- Decisions: none
+- Tests: make check -> 49 passed, 0 errors
+- Next: B-04
+- Needs from others: none
 
 ## 2026-10-31 13:03 IST — B — B-04 — DONE
 - Did: Implemented pure state machines for subscriptions and invoices according to §13.4 and §11 using frozenset.
@@ -9,6 +25,15 @@ Append-only, newest at the bottom. Format: BUILD_PLAN §6.
 - Decisions: none
 - Tests: make check -> 49 passed, 0 errors
 - Next: B-03
+- Needs from others: none
+
+## 2026-10-31 13:04 IST — B — B-03 — DONE
+- Did: Implemented pure discount selection `select(lines, candidates, as_of)` matching §12 contract and types with D-11 eligibility, best-per-line and one-subscription-scope selection.
+- Files: app/domain/discounts.py, tests/engine/test_discounts.py, docs/log/b.md
+- Contract changes: none
+- Decisions: none
+- Tests: make check -> 49 passed, 0 errors
+- Next: B-07
 - Needs from others: none
 
 ## 2026-10-31 13:13 IST — B — B-07 — DONE
