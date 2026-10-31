@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Invoices &middot; Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; 1 &nbsp; Your invoices</h1>
+
+  {% if invoices %}
+    <table class="ledger-table">
+      <thead>
+        <tr>
+          <th>Number</th>
+          <th>Period</th>
+          <th>Issued</th>
+          <th>Due</th>
+          <th>Status</th>
+          <th class="col-amount">Total</th>
+          <th class="col-amount">Paid</th>
+          <th class="col-amount">Outstanding</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for invoice in invoices %}
+          <tr>
+            <td><a href="/portal/invoices/{{ invoice.id }}">{{ invoice.number or "DRAFT" }}</a></td>
+            <td>{{ invoice.period_start.strftime("%d %b %Y") }} to {{ invoice.period_end.strftime("%d %b %Y") }}</td>
+            <td>{{ invoice.issue_date.strftime("%d %b %Y") }}</td>
+            <td>{{ invoice.due_date.strftime("%d %b %Y") }}</td>
+            <td>{{ invoice.status }}</td>
+            <td class="col-amount">{{ invoice.total_minor | money }}</td>
+            <td class="col-amount">{{ invoice.amount_paid_minor | money }}</td>
+            <td class="col-amount">{{ (invoice.total_minor - invoice.amount_paid_minor) | money }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="notice">No invoices yet.</p>
+  {% endif %}
+  <p class="small"><a href="/portal">Back to the portal</a></p>
+</section>
+{% endblock %}

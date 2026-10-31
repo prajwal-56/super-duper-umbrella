@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ subscription.number }} &middot; Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; 1 &nbsp; {{ subscription.number }}</h1>
+
+  <table class="ledger-table">
+    <tbody>
+      <tr><td>Plan</td><td>{{ subscription.plan_name }}</td></tr>
+      <tr><td>Status</td><td>{{ subscription.status }}{% if subscription.is_paused %} (paused){% endif %}</td></tr>
+      <tr><td>Starts</td><td>{{ subscription.start_date.strftime("%d %b %Y") }}</td></tr>
+      <tr><td>Ends</td><td>{{ subscription.expiry_date.strftime("%d %b %Y") }}</td></tr>
+      {% if subscription.closed_on %}
+        <tr><td>Closed</td><td>{{ subscription.closed_on.strftime("%d %b %Y") }}{% if subscription.close_reason %} &middot; {{ subscription.close_reason }}{% endif %}</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</section>
+
+<section class="section">
+  <h2 class="section-label">&sect; 2 &nbsp; Lines</h2>
+  {% if lines %}
+    <table class="ledger-table">
+      <thead>
+        <tr><th>Description</th><th class="col-amount">Quantity</th><th class="col-amount">Unit price</th><th class="col-amount">Line total</th></tr>
+      </thead>
+      <tbody>
+        {% for line in lines %}
+          <tr>
+            <td>{{ line.description }}</td>
+            <td class="col-amount">{{ line.quantity }}</td>
+            <td class="col-amount">{{ line.unit_price_minor | money }}</td>
+            <td class="col-amount">{{ line.line_subtotal_minor | money }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="notice">No lines on this subscription.</p>
+  {% endif %}
+</section>
+
+<section class="section">
+  <h2 class="section-label">&sect; 3 &nbsp; Invoices for this subscription</h2>
+  {% if invoices %}
+    <table class="ledger-table">
+      <thead>
+        <tr><th>Number</th><th>Period</th><th>Status</th><th class="col-amount">Total</th></tr>
+      </thead>
+      <tbody>
+        {% for invoice in invoices %}
+          <tr>
+            <td><a href="/portal/invoices/{{ invoice.id }}">{{ invoice.number or "DRAFT" }}</a></td>
+            <td>{{ invoice.period_start.strftime("%d %b %Y") }} to {{ invoice.period_end.strftime("%d %b %Y") }}</td>
+            <td>{{ invoice.status }}</td>
+            <td class="col-amount">{{ invoice.total_minor | money }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="notice">No invoices for this subscription yet.</p>
+  {% endif %}
+  <p class="small"><a href="/portal">Back to the portal</a></p>
+</section>
+{% endblock %}

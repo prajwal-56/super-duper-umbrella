@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Your profile &middot; Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; 1 &nbsp; Your profile</h1>
+
+  {% if customer %}
+    <table class="ledger-table">
+      <tbody>
+        <tr><td>Name</td><td>{{ customer.name }}</td></tr>
+        <tr><td>Email</td><td>{{ customer.email or "" }}</td></tr>
+        <tr><td>Phone</td><td>{{ customer.phone or "" }}</td></tr>
+        <tr><td>Address</td><td>{{ customer.address or "" }}</td></tr>
+      </tbody>
+    </table>
+    <p class="small">Ask your provider to change these details; they are kept on the customer record used for invoices.</p>
+  {% else %}
+    <p class="notice">No customer record is linked to this account yet.</p>
+  {% endif %}
+  <p class="small"><a href="/portal">Back to the portal</a></p>
+</section>
+{% endblock %}

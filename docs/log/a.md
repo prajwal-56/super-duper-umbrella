@@ -71,3 +71,13 @@ Append-only, newest at the bottom. Format: BUILD_PLAN §6.
 - Not built: the Tier 1 "confirm all drafts from this run" and "hammer it" buttons.
 - Next: A-11 portal, A-15 seed, A-16 e2e, A-17 README.
 - Needs from others: B: rebase #2, #3, #4, #60; C: #5 style lint + #57 class names; D: nothing pushed, issue #6.
+
+## 2026-10-31 13:20 IST — A — A-11 — DONE (read-only)
+- Did: the customer portal behind `portal:own`: `/portal` (own subscriptions, last ten invoices, outstanding), `/portal/subscriptions/{id}` (plan, dates, lines, invoices), `/portal/invoices`, `/portal/invoices/{id}` (print view with a `window.print()` button), `/portal/profile`. Every query goes through the new read model `app/services/portal.py` and filters on the customer id from the session, so another customer's id is a 404, not a 403.
+- Files: `app/services/portal.py`, `app/routes/portal.py`, `app/templates/portal/*.html`, `tests/authz/test_portal_idor.py`, `docs/tasks/a.md`.
+- Contract changes: none. `app/services/portal.py` is a new A-owned read model; it adds no §12 signature and duplicates no write path.
+- Decisions: none.
+- Tests: `make check` -> `91 passed, 1 warning in 15.53s`, including the two IDOR cases (another customer's subscription and invoice are 404) that D-30 moved here from A-10.
+- Not built: pause/resume/close/renew buttons (need `lifecycle.allowed_actions`, B-07) and D's `invoice_print.html` partial (D-02); the portal renders its own print layout until then.
+- Next: A-15 seed, A-16 e2e, A-17 README; merge captain at the 14:01 window.
+- Needs from others: B: rebase #2, #3, #4, #60; C: #5 style lint + #57 class names; D: nothing pushed, issue #6.

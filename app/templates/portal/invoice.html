@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Invoice {{ invoice.number or "DRAFT" }} &middot; Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; 1 &nbsp; Invoice {{ invoice.number or "DRAFT" }}</h1>
+
+  <table class="ledger-table">
+    <tbody>
+      <tr><td>Billed to</td><td>{{ customer.name if customer else "" }}</td></tr>
+      <tr><td>Period</td><td>{{ invoice.period_start.strftime("%d %b %Y") }} to {{ invoice.period_end.strftime("%d %b %Y") }}</td></tr>
+      <tr><td>Issued</td><td>{{ invoice.issue_date.strftime("%d %b %Y") }}</td></tr>
+      <tr><td>Due</td><td>{{ invoice.due_date.strftime("%d %b %Y") }}</td></tr>
+      <tr><td>Status</td><td>{{ invoice.status }}</td></tr>
+    </tbody>
+  </table>
+
+  <table class="ledger-table">
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th class="col-amount">Qty</th>
+        <th class="col-amount">Unit</th>
+        <th class="col-amount">Discount</th>
+        <th class="col-amount">Tax</th>
+        <th class="col-amount">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for line in lines %}
+        <tr>
+          <td>{{ line.description }}</td>
+          <td class="col-amount">{{ line.quantity }}</td>
+          <td class="col-amount">{{ line.unit_price_minor | money }}</td>
+          <td class="col-amount">{{ line.discount_minor | money }}</td>
+          <td class="col-amount">{{ line.tax_minor | money }}</td>
+          <td class="col-amount">{{ line.total_minor | money }}</td>
+        </tr>
+      {% endfor %}
+      <tr class="row-total">
+        <td colspan="5">Subtotal</td>
+        <td class="col-amount">{{ invoice.subtotal_minor | money }}</td>
+      </tr>
+      <tr class="row-total">
+        <td colspan="5">Discount</td>
+        <td class="col-amount">{{ invoice.discount_minor | money }}</td>
+      </tr>
+      <tr class="row-total">
+        <td colspan="5">Tax</td>
+        <td class="col-amount">{{ invoice.tax_minor | money }}</td>
+      </tr>
+      <tr class="row-total">
+        <td colspan="5">Total</td>
+        <td class="col-amount">{{ invoice.total_minor | money }}</td>
+      </tr>
+      <tr class="row-total">
+        <td colspan="5">Paid</td>
+        <td class="col-amount">{{ invoice.amount_paid_minor | money }}</td>
+      </tr>
+      <tr class="row-total">
+        <td colspan="5">Outstanding</td>
+        <td class="col-amount">{{ (invoice.total_minor - invoice.amount_paid_minor) | money }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="small">
+    <button class="button" type="button" onclick="window.print()">Print</button>
+    <a href="/portal/invoices">Back to invoices</a>
+  </p>
+</section>
+{% endblock %}
