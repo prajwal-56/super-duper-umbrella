@@ -5,6 +5,7 @@ from __future__ import annotations
 import psycopg
 
 from app.audit import audit
+from app.clock import now
 from app.outbox import queue_email
 
 
@@ -102,10 +103,11 @@ def cancel(
         """,
         (invoice_id,),
     ).fetchall()
+    current_ts = now()
     for r in redemptions:
         conn.execute(
-            "UPDATE discount_redemptions SET voided_at = now() WHERE id = %s",
-            (r["id"],),
+            "UPDATE discount_redemptions SET voided_at = %s WHERE id = %s",
+            (current_ts, r["id"]),
         )
         conn.execute(
             "UPDATE discounts SET usage_count = GREATEST(0, usage_count - 1) WHERE id = %s",
@@ -163,9 +165,10 @@ def send(conn: psycopg.Connection, invoice_id: int, actor_id: int | None) -> Non
         body_html=body_html,
         link=f"/app/invoices/{invoice_id}",
     )
+    current_ts = now()
     conn.execute(
-        "UPDATE invoices SET sent_at = now() WHERE id = %s",
-        (invoice_id,),
+        "UPDATE invoices SET sent_at = %s WHERE id = %s",
+        (current_ts, invoice_id),
     )
     audit(conn, actor_id, "invoice.send", "invoice", invoice_id)
 

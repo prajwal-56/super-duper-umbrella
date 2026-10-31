@@ -133,7 +133,7 @@ def overdue(conn: psycopg.Connection, filters: dict, page: int, page_size: int) 
         SELECT i.id, i.number, i.status, i.issue_date, i.due_date,
                i.total_minor, i.amount_paid_minor,
                (i.total_minor - i.amount_paid_minor) AS outstanding_minor,
-               (CURRENT_DATE - i.due_date) AS days_overdue,
+               (%s::date - i.due_date) AS days_overdue,
                c.name AS customer_name, c.email AS customer_email,
                s.number AS sub_number
         FROM invoices i
@@ -143,7 +143,7 @@ def overdue(conn: psycopg.Connection, filters: dict, page: int, page_size: int) 
         ORDER BY i.due_date ASC, i.id
         LIMIT %s OFFSET %s
         """,
-        params + [page_size, offset],
+        [as_of] + params + [page_size, offset],
     ).fetchall()
 
     return {

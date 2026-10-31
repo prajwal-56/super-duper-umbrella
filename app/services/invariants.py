@@ -80,7 +80,10 @@ def run_all(conn: psycopg.Connection) -> list[InvariantResult]:
         FROM invoices i
         JOIN invoice_lines il ON il.invoice_id = i.id
         GROUP BY i.id, i.subtotal_minor, i.discount_minor, i.tax_minor, i.total_minor
-        HAVING sub_mismatch OR disc_mismatch OR tax_mismatch OR total_mismatch
+        HAVING i.subtotal_minor != SUM(il.line_subtotal_minor)
+            OR i.discount_minor != SUM(il.discount_minor)
+            OR i.tax_minor != SUM(il.tax_minor)
+            OR i.total_minor != SUM(il.total_minor)
         """,
     )
     has02 = any(
@@ -150,7 +153,7 @@ def run_all(conn: psycopg.Connection) -> list[InvariantResult]:
             WHERE start_date + (g.g || ' month')::interval <= expiry_date
           ),
           invoiced AS (
-            SELECT DISTINCT sub_id, period_start
+            SELECT DISTINCT subscription_id AS sub_id, period_start
             FROM invoices
             WHERE status <> 'cancelled'
           ),
@@ -240,10 +243,16 @@ def run_all(conn: psycopg.Connection) -> list[InvariantResult]:
     inv07_rows = _exec(
         conn,
         """
-        SELECT considered, COUNT(*) AS item_count
-        FROM billing_run_items
-        GROUP BY considered
-        HAVING COUNT(*) != SUM(considered)
+        SELECT r.id AS run_id,
+               r.considered,
+               COALESCE(i.item_count, 0) AS item_count
+        FROM billing_runs r
+        LEFT JOIN (
+            SELECT run_id, COUNT(*) AS item_count
+            FROM billing_run_items
+            GROUP BY run_id
+        ) i ON i.run_id = r.id
+        WHERE r.considered != COALESCE(i.item_count, 0)
         """,
     )
     ok07 = len(inv07_rows) == 0
