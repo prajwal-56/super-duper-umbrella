@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Integrity Checks</title></head>
+<body class="ledger-sheet">
+<header><h1>Integrity Checks</h1><nav> / <a href="/app/dashboard">dashboard</a></nav></header>
+<main>
+{% if all_ok %}
+<p class="notice" style="color: green">All checks passed ✓</p>
+{% else %}
+<p class="notice" style="color: red">{{ violation_count|default(0) }} violations found across {{ results|length }} checks</p>
+{% endif %}
+<table>
+<thead><tr><th>#</th><th>Check</th><th>Status</th><th>Violations</th><th>Sample</th></tr></thead>
+<tbody>
+{% for r in results %}
+<tr class="{{ "good" if r.ok else "bad" }}">
+  <td>{{ r.id }}</td>
+  <td>{{ r.name }}</td>
+  <td {% if r.ok %}style="color: green"{{ else }}style="color: red"{{ endif }}">{{ "OK" if r.ok else "FAIL" }}</td>
+  <td>{{ r.violations }}</td>
+  <td>
+    {% if r.sample_rows %}
+    <pre>{{ r.sample_rows[0] | e }}</pre>
+    {% else %}
+    -
+    {% endif %}
+  </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+<a href="/app/integrity/run" class="button primary">Run now</a>
+<a href="/app/dashboard" class="button">Back to dashboard</a>
+</main>
+<footer>FOLIO app/integrity · set in {{ request_time }} ms</footer>
+</body>
+</html>

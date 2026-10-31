@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Dashboard</title></head>
+<body class="ledger-sheet">
+<header><h1>Trial Balance</h1><nav> / <a href="/app">app</a> <span>staff</span></span></nav></header>
+<main>
+<div class="leaders">
+  <div><span>Active Subscriptions</span><span>{{ dashboard.active_count|fmt }}</span></div>
+  <div><span>MRR</span><span>{{ (dashboard.collected / 12)|fmt }}</span></div>
+  <div><span>Collected</span><span>{{ dashboard.collected|fmt }}</span></div>
+  <div><span>Outstanding</span><span>{{ dashboard.outstanding|fmt }}</span></div>
+  <div><span>Overdue Count</span><span>{{ dashboard.overdue_count|fmt }}</span></div>
+  <div><span>Overdue Amount</span><span>{{ dashboard.overdue_amount|fmt }}</span></div>
+</div>
+<h2>Overdue Invoices</h2>
+<table>
+<thead><tr><th>Number</th><th>Due Date</th><th>Total</th><th>Paid</th><th>Outstanding</th><th>Actions</th></tr></thead>
+<tbody>
+{% for inv in overdue.invoices %}
+<tr><td>{{ inv.number }}</td><td>{{ inv.due_date }}</td><td>{{ inv.total_minor|fmt }}</td><td>{{ inv.amount_paid_minor|fmt }}</td><td>{{ inv.outstanding|fmt }}</td><td><a href="/app/invoices/{{ inv.id }}">View</a></tr>
+{% endfor %}
+</tbody>
+</table>
+{% if overdue.total == 0 %}
+<p>No overdue invoices.</p>
+{% endif %}
+<h3>Aging</h3>
+<div class="leaders">
+  <div><span>0-30 days</span><span>{{ dashboard.aging_0_30|fmt }}</span></div>
+  <div><span>31-60 days</span><span>{{ dashboard.aging_31_60|fmt }}</span></div>
+  <div><span>61-90 days</span><span>{{ dashboard.aging_61_90|fmt }}</span></div>
+  <div><span>90+ days</span><span>{{ dashboard.aging_90plus|fmt }}</span></div>
+</div>

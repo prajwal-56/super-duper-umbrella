@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Overdue Invoices</title></head>
+<body class="ledger-sheet">
+<header><h1>Overdue Invoices</h1><nav> / <a href="/app/dashboard">dashboard</a></nav></header>
+<main>
+<table>
+<thead><tr><th>Number</th><th>Due Date</th><th>Total</th><th>Paid</th><th>Outstanding</th><th>Send Reminder</th></tr></thead>
+<tbody>
+{% for inv in overdue.invoices %}
+<tr><td>{{ inv.number }}</td><td>{{ inv.due_date }}</td><td>{{ inv.total_minor|fmt }}</td><td>{{ inv.amount_paid_minor|fmt }}</td><td>{{ inv.outstanding|fmt }}</td><td><form method="post" action="/app/invoices/{{ inv.id }}/send"><button>Reminder</button></form></td></tr>
+{% endfor %}
+</tbody>
+</table>
+{% if overdue.total == 0 %}
+<p>No overdue invoices.</p>
+{% endif %}
+<a href="/app/dashboard">Back to dashboard</a>
+</main>
+<footer>FOLIO app/overdue · set in {{ request_time }} ms</footer>
+</body>
+</html>
