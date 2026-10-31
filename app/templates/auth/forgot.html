@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Forgot password &middot; Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; 3 &nbsp; Forgot password</h1>
+
+  {% if sent %}
+    <p class="notice">If that email address is registered, a reset link has been sent to it. It expires in 30 minutes.</p>
+  {% endif %}
+  {% if errors %}
+    <ul class="errors">
+      {% for message in errors %}<li>{{ message }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+
+  <form method="post" action="/forgot" class="form">
+    <label class="field">
+      <span>Email</span>
+      <input type="email" name="email" value="{{ email or '' }}" required autocomplete="username">
+    </label>
+    <button class="button primary" type="submit">Send reset link</button>
+  </form>
+
+  <p class="small"><a href="/login">Back to sign in</a></p>
+</section>
+{% endblock %}

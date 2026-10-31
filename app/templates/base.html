@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Brightloop Ledger{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Source+Serif+4:wght@600&display=swap">
+  <link rel="stylesheet" href="/static/ledger.css">
+</head>
+<body>
+<div class="sheet">
+  <div class="margin-rule" aria-hidden="true"></div>
+  <header class="masthead">
+    <div class="brand"><a href="/">Brightloop Ledger</a></div>
+    {% if nav %}
+    <nav class="nav">
+      {% for label, path in nav %}
+        <a href="{{ path }}"{% if request.url.path == path %} class="current"{% endif %}>{{ label }}</a>
+        {% if not loop.last %}<span class="sep">/</span>{% endif %}
+      {% endfor %}
+    </nav>
+    {% endif %}
+    <div class="whoami">
+      {% if user %}
+        <span class="identity">{{ user.email }} &middot; {{ user.role }}</span>
+        <form method="post" action="/logout" class="logout-form">
+          <button type="submit" class="link-button">Sign out</button>
+        </form>
+      {% endif %}
+      {% if system_date %}
+        <span class="system-date{% if simulated %} simulated{% endif %}">System date {{ system_date.strftime("%d %b %Y")|upper }}{% if simulated %} (simulated){% endif %}</span>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="folio">Folio {{ request.url.path }} &middot; set in {{ duration_ms }} ms</footer>
+</div>
+</body>
+</html>

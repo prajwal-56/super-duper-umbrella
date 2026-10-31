@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; 1 &nbsp; Signed in</h1>
+  <p>You are signed in as {{ user.email }} ({{ user.role }}).</p>
+  {% if nav %}
+  <p>The working pages are listed in the header.</p>
+  {% else %}
+  <p>The working pages are being fitted out. Sign in as an administrator once the catalog is open.</p>
+  {% endif %}
+</section>
+{% endblock %}

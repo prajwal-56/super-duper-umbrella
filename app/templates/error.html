@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} &middot; Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; &nbsp; {{ title }}</h1>
+  <p class="error">{{ message }}</p>
+  <p><a href="/">Back to the ledger</a></p>
+</section>
+{% endblock %}

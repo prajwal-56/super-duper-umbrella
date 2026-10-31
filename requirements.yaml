@@ -1,0 +1,48 @@
+# Requirements register (BUILD_PLAN §9). Tag tests with the ID in the test name or a comment.
+version: 1
+requirements:
+  - {id: R-AUTH-01, area: auth, text: "Signup with email + password creates a customer account (and its customer record)."}
+  - {id: R-AUTH-02, area: auth, text: "One account per email (case-insensitive)."}
+  - {id: R-AUTH-03, area: auth, text: "Password: MORE than 8 characters (so >= 9), >= 1 uppercase, >= 1 lowercase, >= 1 special character. Server-side. 8 chars must fail."}
+  - {id: R-AUTH-04, area: auth, text: "Forgot password sends a reset link to the registered email (single-use, expiring, identical response whether or not the email exists)."}
+  - {id: R-RBAC-01, area: access, text: "Roles admin, staff, customer, with the matrix in §14."}
+  - {id: R-RBAC-02, area: access, text: "Only admin can add staff."}
+  - {id: R-RBAC-03, area: access, text: "Customers see only their own subscriptions and invoices, including by direct URL/ID."}
+  - {id: R-RBAC-04, area: access, text: "Only admin can create discount rules."}
+  - {id: R-PROD-01, area: catalog, text: "Product: name, type, sales price, cost price, notes."}
+  - {id: R-PROD-02, area: catalog, text: "Variants (e.g. brand) with extra price (Odoo = +560.00) flowing to subscription lines and invoices."}
+  - {id: R-PLAN-01, area: catalog, text: "Plan: price, billing period (daily/weekly/monthly/yearly), minimum quantity, availability dates."}
+  - {id: R-PLAN-02, area: catalog, text: "Per-plan flags (auto-close, allow early close, allow pause, allow renew) enforced."}
+  - {id: R-TPL-01, area: catalog, text: "Quotation template: plan + product lines + validity days."}
+  - {id: R-TAX-01, area: catalog, text: "Admin-defined tax rules applied automatically."}
+  - {id: R-PT-01, area: catalog, text: "Payment terms."}
+  - {id: R-SUB-01, area: subscriptions, text: "Number, customer, plan, start date, expiry date, payment terms."}
+  - {id: R-SUB-02, area: subscriptions, text: "Lines: product, quantity, unit price, taxes, amount."}
+  - {id: R-SUB-03, area: subscriptions, text: "Create from quotation template."}
+  - {id: R-SUB-04, area: subscriptions, text: "Lifecycle Draft -> Quotation -> Confirmed -> Active -> Closed, enforced server-side, visible to the team."}
+  - {id: R-SUB-05, area: subscriptions, text: "Quote validity expires after N days."}
+  - {id: R-SUB-06, area: subscriptions, text: "Pause/resume, early close, renew (per plan flags); auto-close."}
+  - {id: R-BILL-01, area: billing, text: "Invoice generated from subscription with customer details, lines, taxes, totals filled in."}
+  - {id: R-BILL-02, area: billing, text: "One action bills all due subscriptions."}
+  - {id: R-BILL-03, area: billing, text: "Never billed twice (idempotent, crash-safe, concurrency-safe)."}
+  - {id: R-BILL-04, area: billing, text: "Never skipped (catch-up; every candidate accounted for in the run)."}
+  - {id: R-BILL-05, area: billing, text: "Taxes auto-calculated from admin rules."}
+  - {id: R-BILL-06, area: billing, text: "Invoice actions: confirm, cancel, send, print."}
+  - {id: R-BILL-07, area: billing, text: "Invoice lifecycle Draft -> Confirmed -> Paid."}
+  - {id: R-DISC-01, area: discounts, text: "Fixed or percentage; min purchase or min quantity; start/end dates; usage limit."}
+  - {id: R-DISC-02, area: discounts, text: "Applies to specific products or whole subscriptions."}
+  - {id: R-DISC-03, area: discounts, text: "Appears on the next invoice automatically."}
+  - {id: R-DISC-04, area: discounts, text: "Stops on expiry or exhaustion (race-safe)."}
+  - {id: R-PAY-01, area: money, text: "Record method, amount, date, note against an invoice."}
+  - {id: R-PAY-02, area: money, text: "Paid vs outstanding visible at any moment."}
+  - {id: R-PAY-03, area: money, text: "Overdue invoices identifiable and chaseable."}
+  - {id: R-RPT-01, area: reports, text: "One place for active subscriptions, revenue, payments, overdue invoices."}
+  - {id: R-RPT-02, area: reports, text: "Filters and a summary view."}
+  - {id: R-RPT-03, area: reports, text: "Every page responds in under 2 s with thousands of subscriptions."}
+  - {id: R-PORT-01, area: portal, text: "Customer portal to view and manage own subscriptions and view invoices."}
+  - {id: X-CLK-01, area: ours, text: "Simulated clock (admin, DEMO_MODE only)."}
+  - {id: X-RUN-01, area: ours, text: "Billing-run dispositions and dry-run through the same code path."}
+  - {id: X-INV-01, area: ours, text: "Integrity page with independent SQL checks."}
+  - {id: X-EXP-01, area: ours, text: "Calculation trace on invoice lines, shown in the UI."}
+  - {id: X-PERF-01, area: ours, text: "Scale seed, perf report, server-time footer."}
+  - {id: X-OUT-01, area: ours, text: "Email outbox viewer."}
