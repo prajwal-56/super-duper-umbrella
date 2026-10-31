@@ -52,3 +52,12 @@ Append-only, newest at the bottom. Format: BUILD_PLAN §6.
 - Tests: `make check` -> `69 passed, 1 warning in 10.07s`.
 - Next: A-12 `/app/clock` page (needs `lifecycle.run_daily` from B-07 to actually advance), A-11 portal once B-07 and D-02 land.
 - Needs from others: B: rebase #2, #3, #4 on `main` (conflict is only `docs/log/b.md`); C: fix #5 (style lint: 3 inline `style=` attributes) and the class-name issue #57; D: rebase issue #6.
+
+## 2026-10-31 13:22 IST — A — A-12 — DONE
+- Did: `/app/clock` behind `clock:admin` (so DEMO_MODE only): current business date and mode, advance by days and months, jump to a date, reset to the real date. Every move goes through `app.clock`, which already calls `lifecycle.run_daily`, and writes a `clock.advance`/`clock.set_simulated`/`clock.reset` audit row with the admin as actor. Nav now hides DEMO_ONLY entries when demo mode is off, so the Clock link no longer 403s outside a demo.
+- Files: `app/routes/clock.py`, `app/templates/clock/index.html`, `app/templating.py`, `tests/base/test_clock_page.py`, `docs/tasks/a.md`.
+- Contract changes: none.
+- Decisions: none.
+- Tests: `make check` -> `78 passed, 1 warning in 12.92s`. The page tests record `lifecycle.run_daily` at the seam; the real daily job is B's tests plus the e2e path.
+- Next: A-11 portal (blocked on B-07 and D-02), A-14 billing-run pages (blocked on B-06), A-15 seed, A-17 README.
+- Needs from others: B: rebase #2, #3, #4; C: fix #5 and #57; D: nothing pushed yet, issue #6 is the whole money track.
