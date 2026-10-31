@@ -22,6 +22,7 @@ extend-immutable-calls = [
     "fastapi.Path",
     "fastapi.Header",
     "fastapi.Body",
+    "app.deps.require",
 ]
 
 [tool.ruff.lint.per-file-ignores]

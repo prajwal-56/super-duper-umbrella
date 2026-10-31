@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% from "_ui.html" import ledger_table, button, empty_state, stamp, amount %}
+{% block title %}Plans · Catalog · Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; Plans</h1>
+
+  {% if 'catalog:write' | can(user.role) %}
+    <p><a href="/app/catalog/plans/new" class="button primary" id="new-plan">+ New plan</a></p>
+  {% endif %}
+
+  {% if plans %}
+    <table class="ledger-table" id="plans-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Interval</th>
+          <th class="num">Plan fee (INR)</th>
+          <th class="num">Min qty</th>
+          <th>Availability</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in plans %}
+        <tr>
+          <td><a href="/app/catalog/plans/{{ p.id }}">{{ p.name }}</a></td>
+          <td>Every {{ p.interval_count }} {{ p.billing_interval }}{{ "s" if p.interval_count > 1 else "" }}</td>
+          <td class="num">{{ p.price_minor | money if p.price_minor else "—" }}</td>
+          <td class="num">{{ p.min_quantity }}</td>
+          <td>
+            {% if p.available_from or p.available_to %}
+              {{ p.available_from or "…" }} – {{ p.available_to or "…" }}
+            {% else %}
+              Always
+            {% endif %}
+          </td>
+          <td>{{ stamp("active" if p.active else "inactive") }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    {{ empty_state("No plans yet", "Create billing plans that define how subscriptions are invoiced.") }}
+  {% endif %}
+</section>
+{% endblock %}

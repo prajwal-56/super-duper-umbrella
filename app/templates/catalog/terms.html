@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "_ui.html" import ledger_table, button, empty_state %}
+{% block title %}Payment Terms · Catalog · Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; Payment Terms</h1>
+
+  {% if 'catalog:write' | can(user.role) %}
+    <p><a href="/app/catalog/terms/new" class="button primary" id="new-term">+ New term</a></p>
+  {% endif %}
+
+  {% if terms %}
+    <table class="ledger-table" id="terms-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th class="num">Due Days</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in terms %}
+        <tr>
+          <td><a href="/app/catalog/terms/{{ t.id }}">{{ t.name }}</a></td>
+          <td class="num">{{ t.due_days }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    {{ empty_state("No payment terms yet", "Create a term like 'Net 30' to use on subscriptions.") }}
+  {% endif %}
+</section>
+{% endblock %}

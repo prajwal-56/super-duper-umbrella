@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% from "_ui.html" import detail_block, detail_row, stamp, button, field, select_field,
+                          ledger_table, empty_state, amount %}
+{% block title %}{{ product.name }} · Product · Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; Product: {{ product.name }}</h1>
+
+  {% set can_write = 'catalog:write' | can(user.role) %}
+
+  {{ detail_block() }}
+    {{ detail_row("Name", product.name) }}
+    {{ detail_row("Type", product.type) }}
+    {{ detail_row("Sales price", product.sales_price_minor | money) }}
+    {{ detail_row("Cost price", product.cost_price_minor | money) }}
+    {{ detail_row("Tax", (product.tax_name ~ " (" ~ "%.1f"|format(product.tax_rate / 100) ~ "%)" if product.tax_name else "None")) }}
+    {{ detail_row("Status", stamp("active" if product.active else "inactive")) }}
+  </dl>
+
+  {% if can_write %}
+    <p><a href="/app/catalog/products/{{ product.id }}/edit" class="button primary" id="edit-product">Edit</a></p>
+  {% endif %}
+</section>
+
+{# ── Variants ──────────────────────────────────────────────────────────── #}
+<section class="section">
+  <h2 class="section-label">&sect; Variants</h2>
+
+  {% if variants %}
+    <table class="ledger-table" id="variants-table">
+      <thead>
+        <tr>
+          <th>Attribute</th>
+          <th>Value</th>
+          <th class="num">Extra price (INR)</th>
+          {% if can_write %}<th></th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in variants %}
+        <tr>
+          <td>{{ v.attribute }}</td>
+          <td>{{ v.value }}</td>
+          <td class="num">{{ v.extra_price_minor | money }}</td>
+          {% if can_write %}
+          <td>
+            <form method="post" action="/app/catalog/products/{{ product.id }}/variants/{{ v.id }}/delete"
+                  class="form">
+              {{ button("Remove", type="submit", variant="destructive") }}
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    {{ empty_state("No variants", "Add variants like colour or size with an optional price premium.") }}
+  {% endif %}
+
+  {% if can_write %}
+    {% if variant_errors is defined and variant_errors %}
+      <div class="errors">
+        {% for e in variant_errors %}<p class="error">{{ e }}</p>{% endfor %}
+      </div>
+    {% endif %}
+    <form method="post" action="/app/catalog/products/{{ product.id }}/variants"
+          class="form" id="add-variant-form">
+      <h3>Add variant</h3>
+      {{ field("Attribute", "attribute",
+               v_attribute if v_attribute is defined else "",
+               placeholder="e.g. Colour", id="variant-attr") }}
+      {{ field("Value", "value",
+               v_value if v_value is defined else "",
+               placeholder="e.g. Red", id="variant-value") }}
+      {{ field("Extra price (INR)", "extra_price",
+               v_extra_price if v_extra_price is defined else "",
+               placeholder="0.00", id="variant-extra") }}
+      {{ button("Add variant", type="submit", variant="primary", id="variant-save") }}
+    </form>
+  {% endif %}
+</section>
+
+{# ── Plan price overrides ──────────────────────────────────────────────── #}
+<section class="section">
+  <h2 class="section-label">&sect; Plan price overrides</h2>
+
+  {% if overrides %}
+    <table class="ledger-table" id="overrides-table">
+      <thead>
+        <tr>
+          <th>Plan</th>
+          <th class="num">Override price (INR)</th>
+          {% if can_write %}<th></th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in overrides %}
+        <tr>
+          <td><a href="/app/catalog/plans/{{ o.plan_id }}">{{ o.plan_name }}</a></td>
+          <td class="num">{{ o.price_minor | money }}</td>
+          {% if can_write %}
+          <td>
+            <form method="post" action="/app/catalog/products/{{ product.id }}/overrides/{{ o.plan_id }}/delete"
+                  class="form">
+              {{ button("Remove", type="submit", variant="destructive") }}
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    {{ empty_state("No price overrides", "When a product is on a specific plan, override the default sales price here.") }}
+  {% endif %}
+
+  {% if can_write %}
+    {% if override_errors is defined and override_errors %}
+      <div class="errors">
+        {% for e in override_errors %}<p class="error">{{ e }}</p>{% endfor %}
+      </div>
+    {% endif %}
+    <form method="post" action="/app/catalog/products/{{ product.id }}/overrides"
+          class="form" id="add-override-form">
+      <h3>Set price override</h3>
+      {% set plan_options = [("", "— Select plan —")] %}
+      {% for pl in plans %}
+        {% set _ = plan_options.append((pl.id | string, pl.name)) %}
+      {% endfor %}
+      {{ select_field("Plan", "plan_id", plan_options,
+                       o_plan_id if o_plan_id is defined else "",
+                       id="override-plan") }}
+      {{ field("Override price (INR)", "price",
+               o_price if o_price is defined else "",
+               placeholder="0.00", id="override-price") }}
+      {{ button("Set override", type="submit", variant="primary", id="override-save") }}
+    </form>
+  {% endif %}
+</section>
+
+<p class="small"><a href="/app/catalog/products">&larr; Back to products</a></p>
+{% endblock %}
