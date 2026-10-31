@@ -2,11 +2,11 @@
 
 Append-only, newest at the bottom. Format: BUILD_PLAN §6.
 
-## 2026-10-31 12:17 IST — B — B-01 — DONE
-- Did: Implemented anchor-relative period derivation with month-end clamping, leap year support, pauses, closed_on, and cap limit.
-- Files: app/domain/periods.py, tests/engine/test_periods.py, docs/log/b.md
+## 2026-10-31 13:02 IST — B — B-02 — DONE
+- Did: Implemented pure pricing engine matching §12 contract and types with D-02 half-up rounding, D-03 inclusive/exclusive tax, largest-remainder discount allocation, and calc_trace.
+- Files: app/domain/pricing.py, tests/engine/test_pricing.py, docs/log/b.md
 - Contract changes: none
 - Decisions: none
-- Tests: python3 -m pytest tests/engine/test_periods.py -> 6 passed in 0.11s
-- Next: B-02
+- Tests: make check -> 49 passed, 0 errors
+- Next: B-04
 - Needs from others: none
