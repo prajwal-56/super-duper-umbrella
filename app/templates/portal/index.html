@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Portal &middot; Brightloop Ledger{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="section-label">&sect; 1 &nbsp; Your account</h1>
+  <p>Signed in as {{ customer.name if customer else user.email }}.</p>
+  <p>Outstanding: <strong>{{ outstanding | money }}</strong></p>
+</section>
+
+<section class="section">
+  <h2 class="section-label">&sect; 2 &nbsp; Subscriptions</h2>
+  {% if subscriptions %}
+    <table class="ledger-table">
+      <thead>
+        <tr><th>Number</th><th>Plan</th><th>Status</th><th>Starts</th><th>Ends</th></tr>
+      </thead>
+      <tbody>
+        {% for sub in subscriptions %}
+          <tr>
+            <td><a href="/portal/subscriptions/{{ sub.id }}">{{ sub.number }}</a></td>
+            <td>{{ sub.plan_name }}</td>
+            <td>{{ sub.status }}{% if sub.is_paused %} (paused){% endif %}</td>
+            <td>{{ sub.start_date.strftime("%d %b %Y") }}</td>
+            <td>{{ sub.expiry_date.strftime("%d %b %Y") }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="notice">You have no subscriptions yet. Your provider will add one here.</p>
+  {% endif %}
+</section>
+
+<section class="section">
+  <h2 class="section-label">&sect; 3 &nbsp; Recent invoices</h2>
+  {% if invoices %}
+    <table class="ledger-table">
+      <thead>
+        <tr><th>Number</th><th>Period</th><th>Status</th><th class="col-amount">Total</th><th class="col-amount">Paid</th></tr>
+      </thead>
+      <tbody>
+        {% for invoice in invoices %}
+          <tr>
+            <td><a href="/portal/invoices/{{ invoice.id }}">{{ invoice.number or "DRAFT" }}</a></td>
+            <td>{{ invoice.period_start.strftime("%d %b %Y") }} to {{ invoice.period_end.strftime("%d %b %Y") }}</td>
+            <td>{{ invoice.status }}</td>
+            <td class="col-amount">{{ invoice.total_minor | money }}</td>
+            <td class="col-amount">{{ invoice.amount_paid_minor | money }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="small"><a href="/portal/invoices">All invoices</a></p>
+  {% else %}
+    <p class="notice">No invoices yet.</p>
+  {% endif %}
+</section>
+{% endblock %}
