@@ -89,3 +89,12 @@
 - Tests: make check -> 151 passed, 1 warning in 27.74s
 - Next: B-10 (`chaos.hammer`) / B-12 (`preview_next_invoice`)
 - Needs from others: none
+
+## 2026-10-31 14:25 IST — B — B-12 — DONE
+- Did: Added `preview_next_invoice(conn, subscription_id)` to `app/services/billing.py`: runs the real `bill_subscription` path inside a savepoint, snapshots the first would-be invoice and its lines (including `calc_trace`), then rolls the savepoint back so no invoice, discount usage or sequence value is committed. Returns `None` when nothing is missing.
+- Files: app/services/billing.py, tests/engine/test_preview.py, docs/log/b.md, docs/tasks/b.md
+- Contract changes: none (new helper for subscription pages, §17 B-12)
+- Decisions: preview uses `clock.today()` and returns the oldest missing period, matching what the next live run will bill
+- Tests: make check -> 149 passed, 1 warning in 26.34s
+- Next: B-13 (randomized month simulation)
+- Needs from others: C to surface the preview on subscription pages
