@@ -13,10 +13,10 @@ minutes. Tier 0 unless the line says Tier 1 or Tier 2. Tier 0 is never cut.
 
 ## Phase 0b (T+0:25–0:55) → tag `base-v1`
 
-- [ ] A-06 (10) `clock.py` + table-backed state + `money.py` (fmt/parse/round) + tests + the banned-time grep test.
-- [ ] A-07 (20) Auth: signup with password rules, unique email, login/logout, forgot/reset via outbox (`outbox.queue_email`), argon2id, signed session cookie, `require(permission)`, `permissions.py` matrix, admin seed from env, `queue_email`, `audit`.
-- [ ] A-08 (5) `base.html` wired to `ledger.css` (C's), nav built from `NAV` by role, clock line, footer timing middleware.
-- [ ] A-09 (10) `scripts/gh_bootstrap.py` (uses `gh`): labels (`owner:A..D`, `tier:0/1/2`, `request`, `blocked`, `contract-change`, `decision`, `unassigned`, `freeze-fix`), milestones per gate, issues from the task files, branch protection on `main`. Tag `base-v1`.
+- [x] A-06 (10) `clock.py` + table-backed state + `money.py` (fmt/parse/round) + tests + the banned-time grep test.
+- [x] A-07 (20) Auth: signup with password rules, unique email, login/logout, forgot/reset via outbox (`outbox.queue_email`), argon2id, signed session cookie, `require(permission)`, `permissions.py` matrix, admin seed from env, `queue_email`, `audit`.
+- [x] A-08 (5) `base.html` wired to `ledger.css` (C's), nav built from `NAV` by role, clock line, footer timing middleware.
+- [x] A-09 (10) `scripts/gh_bootstrap.py` (uses `gh`): labels (`owner:A..D`, `tier:0/1/2`, `request`, `blocked`, `contract-change`, `decision`, `unassigned`, `freeze-fix`), milestones per gate, issues from the task files, branch protection on `main`. Tag `base-v1`.
 
 ## Phase 1 (after G1)
 
