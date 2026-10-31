@@ -1,12 +1,18 @@
 """Every protected route declares a permission, and require() enforces it."""
 
+from __future__ import annotations
+
+import re
+
+import pytest
 from fastapi import Depends, FastAPI
 from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 
+from app.config import settings
 from app.deps import require
 from app.main import app
-from app.permissions import MATRIX
+from app.permissions import DEMO_ONLY, MATRIX, can
 
 PUBLIC_PATHS = {"/", "/login", "/signup", "/forgot", "/logout", "/health", "/reset/{token}"}
 
@@ -23,17 +29,76 @@ def _declared_permissions(route: APIRoute) -> list[str]:
     return found
 
 
+def _protected_routes() -> list[APIRoute]:
+    return [
+        route
+        for route in app.routes
+        if isinstance(route, APIRoute) and route.path not in PUBLIC_PATHS
+    ]
+
+
+def _concrete_path(path: str) -> str:
+    """Replace {param} placeholders with a value that simply does not exist."""
+    return re.sub(r"\{[^}]+\}", "1", path)
+
+
+def _matrix_allows(role: str, permissions: list[str]) -> bool:
+    """What §14 says this role may do, including the DEMO_MODE restriction."""
+    for permission in permissions:
+        if permission in DEMO_ONLY and not settings.demo_mode:
+            return False
+        if not can(role, permission):
+            return False
+    return True
+
+
 def test_every_protected_route_declares_a_known_permission():
     problems = []
-    for route in app.routes:
-        if not isinstance(route, APIRoute) or route.path in PUBLIC_PATHS:
-            continue
+    for route in _protected_routes():
         permissions = _declared_permissions(route)
         if not permissions:
             problems.append(f"{route.path} has no require(...) permission")
         for permission in permissions:
             if permission not in MATRIX:
                 problems.append(f"{route.path} declares unknown permission {permission}")
+    assert problems == []
+
+
+@pytest.mark.parametrize("role", ["admin", "staff", "customer"])
+def test_every_route_answers_exactly_as_the_matrix_says(role, create_user):
+    """Walk the whole app as one role and compare each answer with §14.
+
+    A role the matrix allows must never be refused (403). A role it does not
+    allow must always be refused, whatever the handler would have done.
+    """
+    email = f"{role}@example.com"
+    create_user(role=role, email=email)
+
+    client = TestClient(app, base_url="http://testserver", raise_server_exceptions=False)
+    response = client.post(
+        "/login",
+        data={"email": email, "password": "GoodPass#123"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303, response.text
+
+    problems = []
+    for route in _protected_routes():
+        permissions = _declared_permissions(route)
+        allowed = _matrix_allows(role, permissions)
+        path = _concrete_path(route.path)
+        for method in sorted(route.methods):
+            body = {} if method in {"GET", "HEAD"} else {"data": {}}
+            result = client.request(method, path, follow_redirects=False, **body)
+            if allowed and result.status_code == 403:
+                problems.append(
+                    f"{method} {path}: {role} was refused but §14 allows {permissions}"
+                )
+            if not allowed and result.status_code != 403:
+                problems.append(
+                    f"{method} {path}: {role} got {result.status_code}, "
+                    f"expected 403 for {permissions}"
+                )
     assert problems == []
 
 

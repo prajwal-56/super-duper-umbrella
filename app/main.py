@@ -86,6 +86,7 @@ async def request_context(request: Request, call_next):
     from app.deps import current_user
 
     request.state.user = current_user(request)
+    request.state.nav = request.app.state.nav
     state = clock.get_state()
     request.state.clock_state = {"mode": state["mode"], "today": state["today"]}
 
