@@ -24,7 +24,7 @@ minutes. Tier 0 unless the line says Tier 1 or Tier 2. Tier 0 is never cut.
 - [ ] A-11 (40) Tier 0: portal (own subscriptions with allowed actions via `lifecycle.allowed_actions`, own invoices, printable invoice using D's partial, profile).
 - [x] A-12 (15) Tier 0: `/app/clock` page (advance day/week/month, set date, reset; DEMO_MODE only) calling `lifecycle.run_daily`.
 - [x] A-13 (15) Tier 0: `/app/outbox` page (rendered body, clickable link).
-- [ ] A-14 (35) Tier 0: billing-run pages: list, run form (as-of defaults to clock today, dry-run / live / "confirm invoices immediately" checkbox), result page (header counts, integrity summary, disposition table filterable and searchable by subscription). Tier 1: "Confirm all drafts from this run" via `invoices.confirm_many`, "Hammer it" button via `chaos.hammer`.
+- [x] A-14 (35) Tier 0: billing-run pages: list, run form (as-of defaults to clock today, dry-run / live / "confirm invoices immediately" checkbox), result page (header counts, integrity summary, disposition table filterable and searchable by subscription). Tier 1 ("Confirm all drafts from this run", "Hammer it") not built yet.
 - [ ] A-15 (30) Tier 0: `scripts/seed_demo.py` (small, hand-authored realistic dataset, §18), `SEED_ON_BOOT`, `make reset-demo`, `/app/demo/reset` (DEMO_MODE).
 - [ ] A-16 (30) Tier 0: e2e test `tests/e2e/test_month.py` (the G2 path) and later the full demo-script path.
 - [ ] A-17 (40) Tier 0: finalize `README.md` (verify every claim), `docs/DECISIONS.md`, `docs/JUDGE_QA.md`, demo rehearsal, backup video, fresh-clone test, `style_lint.py` complete.

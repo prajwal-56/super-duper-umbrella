@@ -61,3 +61,13 @@ Append-only, newest at the bottom. Format: BUILD_PLAN §6.
 - Tests: `make check` -> `78 passed, 1 warning in 12.92s`. The page tests record `lifecycle.run_daily` at the seam; the real daily job is B's tests plus the e2e path.
 - Next: A-11 portal (blocked on B-07 and D-02), A-14 billing-run pages (blocked on B-06), A-15 seed, A-17 README.
 - Needs from others: B: rebase #2, #3, #4; C: fix #5 and #57; D: nothing pushed yet, issue #6 is the whole money track.
+
+## 2026-10-31 13:17 IST — A — A-14 — DONE (Tier 0)
+- Did: `/app/billing-runs` behind `billing:run`: the form (as-of defaults to `clock.today()`, dry/live, "confirm invoices immediately"), the last 20 runs with considered/invoices/amount, and a result page with header counts, the run's integrity summary and a disposition table searchable by customer name or subscription id. Bad date or unknown mode returns 422 with the form; unknown run is a 404.
+- Files: `app/routes/billing_runs.py`, `app/templates/billing_runs/{index,show}.html`, `tests/base/test_billing_runs_page.py`, `docs/tasks/a.md`.
+- Contract changes: none — the page calls `billing.run_billing(as_of, mode, actor_id, auto_confirm)` exactly as §12 declares it.
+- Decisions: none.
+- Tests: `make check` -> `85 passed, 1 warning in 15.08s`. The live-run path goes through B's stub, so it is exercised by B-06's tests and the e2e, not here.
+- Not built: the Tier 1 "confirm all drafts from this run" and "hammer it" buttons.
+- Next: A-11 portal, A-15 seed, A-16 e2e, A-17 README.
+- Needs from others: B: rebase #2, #3, #4, #60; C: #5 style lint + #57 class names; D: nothing pushed, issue #6.
