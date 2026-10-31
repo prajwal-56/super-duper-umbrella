@@ -91,3 +91,9 @@ Append-only, newest at the bottom. Format: BUILD_PLAN §6.
 - Tests: `make check` -> `114 passed, 1 warning in 17.60s`.
 - Next: A-15 seed, A-16 e2e, A-17 README (all three need C-02/C-05 and D-02/D-03).
 - Needs from others: C: #5 style lint + #57 class names, then C-02/C-03; D: nothing pushed, issue #6 — the money track is the whole G2 gap.
+
+## 2026-10-31 13:38 IST — A — tooling — DONE
+- Did: `pyproject.toml` now tells ruff that `fastapi.Depends/Form/Query/Path/Header/Body` are immutable calls, so B008 stops firing on the FastAPI idiom (56 of C-02's 62 lint errors). No source file changed.
+- Files: `pyproject.toml`.
+- Contract changes: none.
+- Tests: `.venv/bin/ruff check .` -> `All checks passed!`.
