@@ -95,6 +95,28 @@ def create_account(
     return user_id
 
 
+def create_staff(
+    conn: psycopg.Connection,
+    name: str,
+    email: str,
+    password: str,
+    actor_id: int,
+) -> int:
+    """Create a staff account on behalf of an administrator (R-RBAC-02).
+
+    The role is fixed here, never taken from the request, so the users page
+    cannot be used to mint another admin.
+    """
+    return create_account(
+        conn,
+        name=name,
+        email=email,
+        password=password,
+        role="staff",
+        actor_id=actor_id,
+    )
+
+
 def authenticate(email: str, password: str) -> User | None:
     """Return the active User for valid credentials, else None."""
     row = conn_fetch_user(normalize_email(email))

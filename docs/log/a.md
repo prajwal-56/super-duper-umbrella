@@ -33,3 +33,13 @@ Append-only, newest at the bottom. Format: BUILD_PLAN §6.
 - Tests: fresh clone at a18318c -> `44 passed, 1 warning in 5.13s`; `make check` in the working tree -> `44 passed`.
 - Next: A-10 (staff users page, RBAC matrix + IDOR tests).
 - Needs from others: C: open the C-01 PR so `app/static/ledger.css` reaches main; B: PRs for B-01..B-04; D: rebase on `base-0a` (issue #6).
+
+## 2026-10-31 13:04 IST — A — A-10 — DONE (users page + route × role matrix)
+- Did: admin-only `/app/users` page (lists every account, creates staff) behind `require("staff:manage")`; `auth.service.create_staff` fixes the role server-side so the posted form cannot mint an admin; replaced the declaration-only route check with a full route × role walk that compares every response with §14 (403 only where the matrix refuses, never a 403 where it allows, DEMO_MODE restriction included); added the users-page tests (staff/customer 403, weak password and duplicate email 422, audit actor, nav visibility).
+- Files: `app/routes/users.py`, `app/templates/users/index.html`, `app/auth/service.py`, `app/main.py`, `tests/authz/test_route_matrix.py`, `tests/authz/test_users_page.py`, `docs/DECISIONS.md`, `docs/tasks/a.md`.
+- Contract changes: none.
+- Decisions: D-30 (IDOR assertions move to A-11, where the first customer-facing routes exist), D-31 (the `base.html` class names are the layout contract; `ledger.css` must style them).
+- Found: A-08 never populated `request.state.nav`, so the header nav rendered empty on every page; fixed in `app/main.py` and covered by the new nav-visibility test.
+- Tests: `make check` -> `57 passed, 1 warning in 10.08s`.
+- Next: A-11 portal (own subscriptions, own invoices, print view, profile) with the IDOR tests.
+- Needs from others: C: C-01 does not implement the `base.html` class contract — issue filed, fix before merge; B/D: rebase their branches onto `main` (all five open PRs conflict and have no CI run).
