@@ -7,7 +7,7 @@ CREATE INDEX idx_invoices_subscription ON invoices (subscription_id);
 
 -- Payments by invoice and paid date
 CREATE INDEX idx_payments_invoice ON payments (invoice_id);
-CREATE INDEX idx_payments_paid_date ON payments (paid_date);
+CREATE INDEX idx_payments_paid_on ON payments (paid_on);
 
 -- Subscriptions by status and customer
 CREATE INDEX idx_subscriptions_status ON subscriptions (status, customer_id);
