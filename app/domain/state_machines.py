@@ -1,9 +1,26 @@
-"""State machines (pure domain). Owner: B. Created as a contract stub by A."""
+"""State machines (pure domain). Owner: B.
+
+BUILD_PLAN §13.4 & §11.
+"""
 
 from __future__ import annotations
 
-SUBSCRIPTION_TRANSITIONS: dict[str, frozenset[str]] = {}
-INVOICE_TRANSITIONS: dict[str, frozenset[str]] = {}
+# Subscription states: draft, quotation, confirmed, active, closed
+SUBSCRIPTION_TRANSITIONS: dict[str, frozenset[str]] = {
+    "draft": frozenset({"quotation", "confirmed"}),
+    "quotation": frozenset({"confirmed", "draft", "closed"}),
+    "confirmed": frozenset({"active", "closed"}),
+    "active": frozenset({"closed"}),
+    "closed": frozenset(),
+}
+
+# Invoice states: draft, confirmed, paid, cancelled
+INVOICE_TRANSITIONS: dict[str, frozenset[str]] = {
+    "draft": frozenset({"confirmed", "cancelled"}),
+    "confirmed": frozenset({"paid", "cancelled"}),
+    "paid": frozenset(),
+    "cancelled": frozenset(),
+}
 
 
 def can_transition(entity: str, from_status: str, to_status: str) -> bool:
@@ -14,4 +31,11 @@ def can_transition(entity: str, from_status: str, to_status: str) -> bool:
     draft->confirmed, draft->cancelled, confirmed->cancelled, confirmed->paid
     (paid only through a payment). Invalid transitions are rejected with 409.
     """
-    raise NotImplementedError("CONTRACT-STUB owner=B")  # CONTRACT-STUB owner=B
+    if entity == "subscription":
+        allowed = SUBSCRIPTION_TRANSITIONS.get(from_status, frozenset())
+        return to_status in allowed
+    elif entity == "invoice":
+        allowed = INVOICE_TRANSITIONS.get(from_status, frozenset())
+        return to_status in allowed
+    else:
+        raise ValueError(f"Unknown entity type: {entity}")
