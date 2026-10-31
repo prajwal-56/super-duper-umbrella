@@ -53,3 +53,12 @@
 - Tests: make check -> 68 passed, 1 warning in 5.88s
 - Next: B-06 (run_billing)
 - Needs from others: none
+
+## 2026-10-31 13:46 IST — B — B-06 — DONE
+- Did: Implemented `run_billing` in `app/services/billing.py`: bulk candidate/pause/invoice load (3 queries), derived missing periods, per-subscription `FOR UPDATE SKIP LOCKED` transaction, deferred-lock retry once, dry-run via `psycopg.Rollback`, dominant dispositions, 36-missing-period cap, blocked-duplicate counting, closed `billing_complete`, accounting counters and integrity summary. Fixed the old cap bug where long catch-up runs could never bill past the first 36 periods.
+- Files: app/services/billing.py, tests/engine/test_run_billing.py, docs/log/b.md, docs/tasks/b.md
+- Contract changes: none (`run_billing` keeps the §12 signature)
+- Decisions: `blocked_duplicates` counts the gap between missing periods selected under lock and invoice ids actually created; a still-locked retry stays `deferred_locked`. Integrity summary is `None` while D's `invariants.run_all` is a `CONTRACT-STUB`; the `NotImplementedError` is caught specifically, no other exception is swallowed.
+- Tests: make check -> 76 passed, 1 warning in 8.84s
+- Next: B-09 (real-Postgres engine concurrency tests) / B-11 (daily job)
+- Needs from others: D to implement `invariants.run_all` so runs store real INV-01..08 counts.
