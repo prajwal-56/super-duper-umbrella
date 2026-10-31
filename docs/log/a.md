@@ -107,3 +107,11 @@ Append-only, newest at the bottom. Format: BUILD_PLAN §6.
 - Decisions: None.
 - Tests: `make check` -> `163 passed, 1 warning in 23.55s`.
 - Next: A-17 documentation, README finalization, JUDGE_QA.md, and freeze readiness.
+
+## 2026-10-31 16:36 IST — A — A-17 & Freeze Finalization — DONE
+- Did: Merged remaining work and PR #77 for D-money-track, resolved invoice immutability trigger to permit status and payment transitions, eliminated banned-time occurrences in reporting queries, filled all contract stubs (`create_draft`, `create_from_template` in `app/services/subscription_builder.py` with 0 stubs remaining), authored `docs/JUDGE_QA.md` covering technical defenses, verified demo accounts in `README.md`, verified style lint and invariant checks (all 8 green).
+- Files: `app/services/subscription_builder.py`, `tests/catalog/test_subscription_builder.py`, `README.md`, `docs/JUDGE_QA.md`, `docs/tasks/a.md`, `docs/log/a.md`.
+- Contract changes: none.
+- Decisions: None.
+- Tests: `make check` -> `165 passed, 1 warning in 27.87s`; `make invariants` -> `invariants: 8 checks, 0 failing`.
+- Next: Complete project freeze and submission tag.

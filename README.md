@@ -2,8 +2,6 @@
 
 A subscription management system for a company that earns its money every month: products and plans, quotations, subscriptions, automatic recurring invoices, payments, and a finance view. Everything runs from one place, with a customer portal on the side.
 
-<!-- A-17: before submission, verify every claim in this file against the running app. Delete this comment. -->
-
 ## What makes it different
 
 - **Simulated clock.** Walk through a whole billing month in minutes. All business logic reads time from one module.
@@ -21,13 +19,13 @@ A subscription management system for a company that earns its money every month:
 | Staff | Day-to-day: customers, subscriptions, billing runs, invoices, payments, reports |
 | Customer | Own subscriptions and invoices through the portal |
 
-Demo accounts (after `make seed`):
+Demo accounts (after `make reset-demo`):
 
 | Role | Email | Password |
 |---|---|---|
-| Admin | `admin@example.com` | `<fill in from ADMIN_PASSWORD>` |
-| Staff | `staff@example.com` | `<fill in>` |
-| Customer | `customer@example.com` | `<fill in>` |
+| Admin | `admin@example.com` | `Brightloop#2026` |
+| Staff | `staff1@example.com` | `Brightloop#2026` |
+| Customer | `contact@tata-motors-pune.co.in` | `Customer#2026!` |
 
 ## Quick start (local)
 

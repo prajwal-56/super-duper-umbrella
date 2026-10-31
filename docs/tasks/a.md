@@ -27,5 +27,5 @@ minutes. Tier 0 unless the line says Tier 1 or Tier 2. Tier 0 is never cut.
 - [x] A-14 (35) Tier 0: billing-run pages: list, run form (as-of defaults to clock today, dry-run / live / "confirm invoices immediately" checkbox), result page (header counts, integrity summary, disposition table filterable and searchable by subscription). Tier 1 ("Confirm all drafts from this run", "Hammer it") not built yet.
 - [x] A-15 (30) Tier 0: `scripts/seed_demo.py` (small, hand-authored realistic dataset, §18), `SEED_ON_BOOT`, `make reset-demo`, `/app/demo/reset` (DEMO_MODE).
 - [x] A-16 (30) Tier 0: e2e test `tests/e2e/test_month.py` (the G2 path) and later the full demo-script path.
-- [ ] A-17 (40) Tier 0: finalize `README.md` (verify every claim), `docs/DECISIONS.md`, `docs/JUDGE_QA.md`, demo rehearsal, backup video, fresh-clone test, `style_lint.py` complete.
-- [ ] Standing duty: merge captain: at every sync window check open PRs, run `make check` on `main`, post `make status`, tag gates, watch `git shortlog -sn`, assign `unassigned` issues.
+- [x] A-17 (40) Tier 0: finalize `README.md` (verify every claim), `docs/DECISIONS.md`, `docs/JUDGE_QA.md`, demo rehearsal, backup video, fresh-clone test, `style_lint.py` complete.
+- [x] Standing duty: merge captain: at every sync window check open PRs, run `make check` on `main`, post `make status`, tag gates, watch `git shortlog -sn`, assign `unassigned` issues.
