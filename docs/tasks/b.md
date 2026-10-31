@@ -14,7 +14,7 @@ Legend: `- [ ] B-01 (15) ...` — rough minutes. Tier 0 unless marked.
 - [x] B-07 (30) Tier 0: `lifecycle.py` (all transitions, plan flags, quote validity, optimistic version, pause history, renew, `allowed_actions`, `run_daily` auto-activate and auto-close) + tests.
 - [x] B-05 (40) Tier 0: `bill_subscription` (§13.3 per-subscription logic, atomic discount claim, calc_trace stored, audit) + tests.
 - [x] B-06 (40) Tier 0: `run_billing` (candidates, bulk load, dispositions, SKIP LOCKED, deferred retry, dry-run via rollback, accounting rule, integrity summary).
-- [ ] B-09 (30) Tier 0: engine tests on real Postgres: run 3x -> no duplicates; 4 concurrent threads; discount limit race (limit 1, 8 concurrent runs -> exactly 1 use); crash mid-run then re-run -> no gap/no duplicate; pause/void/catch-up dispositions; `considered == items`.
+- [x] B-09 (30) Tier 0: engine tests on real Postgres: run 3x -> no duplicates; 4 concurrent threads; discount limit race (limit 1, 8 concurrent runs -> exactly 1 use); crash mid-run then re-run -> no gap/no duplicate; pause/void/catch-up dispositions; `considered == items`.
 - [ ] B-11 (10) Tier 1: `jobs/daily.py` + `/internal/daily` guarded by `CRON_TOKEN`.
 - [ ] B-10 (20) Tier 1: `chaos.hammer` (N concurrent live runs per round, advance the clock one period between rounds; returns created / duplicates found (must be 0) / blocked_duplicates / invariants).
 - [ ] B-12 (15) Tier 1: `preview_next_invoice(conn, sub_id)` via dry-run for subscription pages.
