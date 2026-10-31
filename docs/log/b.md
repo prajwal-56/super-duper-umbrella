@@ -80,3 +80,12 @@
 - Tests: make check -> 150 passed, 1 warning in 25.22s
 - Next: B-12 (`preview_next_invoice`)
 - Needs from others: none
+
+## 2026-10-31 14:20 IST — B — B-11 — DONE
+- Did: Added `app/jobs/daily.py::run(as_of, actor_id)` which runs `lifecycle.run_daily` (auto-activate/auto-close) and then a live `run_billing`, returning the date, activation/closure counts and the billing run id. Added `POST /internal/daily` in `app/routes/internal.py`, guarded by constant-time comparison of the `X-Cron-Token` header against `settings.cron_token`; an unset token closes the endpoint.
+- Files: app/jobs/daily.py, app/routes/internal.py, tests/engine/test_daily_job.py, docs/log/b.md, docs/tasks/b.md
+- Contract changes: none (new internal endpoint per §16)
+- Decisions: the daily job both transitions subscriptions and bills, so a cron alone keeps the ledger current
+- Tests: make check -> 151 passed, 1 warning in 27.74s
+- Next: B-10 (`chaos.hammer`) / B-12 (`preview_next_invoice`)
+- Needs from others: none
