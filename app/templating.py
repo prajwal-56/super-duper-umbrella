@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.config import settings
 from app.money import fmt
-from app.permissions import can
+from app.permissions import DEMO_ONLY, can
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 
@@ -48,7 +48,9 @@ def render(
     nav_items = [
         (label, path)
         for label, path, permission in raw_nav
-        if user is not None and can(user.role, permission)
+        if user is not None
+        and can(user.role, permission)
+        and (permission not in DEMO_ONLY or settings.demo_mode)
     ]
     clock_state = getattr(request.state, "clock_state", None) or {}
     payload = dict(context)
