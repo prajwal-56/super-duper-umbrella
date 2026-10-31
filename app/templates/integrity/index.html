@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="sheet">
+  <div class="masthead">
+    <div class="brand">
+      <span class="section-label">System Integrity</span>
+      <h1>Audit &amp; Invariant Verification</h1>
+    </div>
+  </div>
+
+  <div class="content">
+    {% if all_ok %}
+    <div class="notice">
+      <p>All business invariants passed cleanly with zero violations.</p>
+    </div>
+    {% else %}
+    <div class="notice error">
+      <p>{{ violation_count|default(0) }} violation(s) detected across {{ results|length }} checks.</p>
+    </div>
+    {% endif %}
+
+    <section class="section">
+      <h2 class="section-label">&sect; 1 &nbsp; Invariant Results</h2>
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th class="num">Violations</th>
+            <th>Sample</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in results %}
+          <tr>
+            <td><code>{{ r.id }}</code></td>
+            <td>{{ r.name }}</td>
+            <td>
+              {% if r.ok %}
+              <span class="stamp">OK</span>
+              {% else %}
+              <span class="stamp destructive">FAIL</span>
+              {% endif %}
+            </td>
+            <td class="num">{{ r.violations }}</td>
+            <td>
+              {% if r.sample_rows %}
+              <code>{{ r.sample_rows[0] | e }}</code>
+              {% else %}
+              &mdash;
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <div class="field">
+      <a href="/app/integrity/run" class="button primary">Run now</a>
+      <a href="/app/dashboard" class="button">Back to dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

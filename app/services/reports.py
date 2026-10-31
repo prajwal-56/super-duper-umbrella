@@ -77,6 +77,26 @@ def dashboard(conn: psycopg.Connection, filters: dict) -> dict:
     overdue_count = int(overdue_row["cnt"])
     overdue_amount = int(overdue_row["amount"])
 
+    # Aging buckets: 0-30, 31-60, 61-90, 90+ days overdue
+    aging_rows = conn.execute(
+        """
+        SELECT
+            COUNT(*) FILTER (WHERE %s - due_date <= 30) AS "0-30",
+            COUNT(*) FILTER (WHERE %s - due_date BETWEEN 31 AND 60) AS "31-60",
+            COUNT(*) FILTER (WHERE %s - due_date BETWEEN 61 AND 90) AS "61-90",
+            COUNT(*) FILTER (WHERE %s - due_date > 90) AS "90+"
+        FROM invoices
+        WHERE status = 'confirmed'
+          AND (total_minor - amount_paid_minor) > 0
+          AND due_date < %s
+        """,
+        (as_of, as_of, as_of, as_of, as_of),
+    ).fetchone()
+    aging_0_30 = int(aging_rows["0-30"])
+    aging_31_60 = int(aging_rows["31-60"])
+    aging_61_90 = int(aging_rows["61-90"])
+    aging_90plus = int(aging_rows["90+"])
+
     # Revenue by month (last 12 months of confirmed/paid invoices)
     rev_rows = conn.execute(
         """
@@ -99,6 +119,10 @@ def dashboard(conn: psycopg.Connection, filters: dict) -> dict:
         "outstanding": outstanding,
         "overdue_count": overdue_count,
         "overdue_amount": overdue_amount,
+        "aging_0_30": aging_0_30,
+        "aging_31_60": aging_31_60,
+        "aging_61_90": aging_61_90,
+        "aging_90plus": aging_90plus,
         "revenue_by_month": revenue_by_month,
         "as_of": as_of,
     }

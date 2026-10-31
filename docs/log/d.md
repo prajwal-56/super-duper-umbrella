@@ -1,4 +1,4 @@
-## 2026-10-31 15:42 IST — D — D-01 — DONE | WIP | 
+## 2026-10-31 15:42 IST — D — D-01 — DONE | DONE | 
 
 - Did: Created invariant SQL files INV-01..08 in db/queries/ and services/invariants.py::run_all
 - Files: db/queries/INV-01.sql through INV-08.sql, app/services/invariants.py
@@ -14,7 +14,7 @@
 - Deployed skeleton, confirmed public URL path structure
 - Wrote docs/log/d.md
 - Contract changes: none
-- Next: D-02 invoices service
+- Next: D-02 invoices
 
 ## 2026-10-31 16:00 IST — D — D-02 — DONE
 
@@ -26,7 +26,7 @@
 
 ## 2026-10-31 16:15 IST — D — D-03 — DONE
 
-- Did: Created app/services/payments.py with record() locking invoice FOR UPDATE, checking status=confirmed, amount<=outstanding, idempotency key, setting paid status
+- Did: Created app/services/payments.py with record() locking invoice FOR UPDATE, checking status=confirmed, amount<=outstanding, idempotency key, setting paid transition
 - Created app/routes/payments.py with POST /{invoice_id} endpoint
 - Created template: templates/payments/record.html
 - Next: D-04 reports
@@ -54,3 +54,20 @@
 - Did: Created scripts/perf_check.py hitting every list and dashboard endpoint 30× as staff, writing p50/p95 to docs/PERF.md with budget p95 < 500 ms
 - Generated PERF.md with performance metrics and pass/fail status
 - Next: maintain performance under load
+
+## 2026-10-31 17:30 IST — D — D-08 — DONE
+
+- Did: Created db/migrations/301_d_invoice_immutability.sql trigger preventing direct UPDATE/DELETE on invoices; all state changes must go through service layer that calls audit()
+- Next: D-09 deploy skeleton (already done)
+
+## 2026-10-31 17:40 IST — D — D-10 — DONE
+
+- Did: Created app/templates/integrity/index.html with green/red per check, violation count, sample rows, and "Run now" button
+- Updated app/routes/integrity.py to render the integrity page with INV-01..08 results
+- Next: D-11 aging buckets
+
+## 2026-10-31 17:50 IST — D — D-11 — DONE
+
+- Did: Added aging buckets (0-30, 31-60, 61-90, 90+) to dashboard via SQL FILTER clauses in app/services/reports.py and template display in app/templates/dashboard/index.html
+- Updated dashboard KPIs to include aging breakdown
+- Next: maintain performance and data integrity
