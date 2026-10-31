@@ -71,3 +71,12 @@
 - Tests: make check -> 152 passed, 1 warning in 30.83s
 - Next: B-11 (`jobs/daily.py` + `/internal/daily`) / B-10 (`chaos.hammer`)
 - Needs from others: none
+
+## 2026-10-31 14:22 IST — B — B-10 — DONE
+- Did: Implemented `app/services/chaos.py::hammer(workers, rounds, actor_id)`: per round it starts `workers` simultaneous live `run_billing` calls behind a barrier, sums their created/blocked counters, counts real duplicate `(subscription_id, period_start)` invoice groups, then advances the simulated clock one month. Returns `{created, duplicates, blocked_duplicates, invariants}`; rejects `workers < 1` or `rounds < 1`.
+- Files: app/services/chaos.py, tests/engine/test_chaos.py, docs/log/b.md, docs/tasks/b.md
+- Contract changes: none
+- Decisions: `duplicates` is the number of surplus non-cancelled invoice rows over the unique `(subscription_id, period_start)` key (must be 0); invariants return `[]` while D's `run_all` is a stub, otherwise the real result list
+- Tests: make check -> 150 passed, 1 warning in 25.22s
+- Next: B-12 (`preview_next_invoice`)
+- Needs from others: none
