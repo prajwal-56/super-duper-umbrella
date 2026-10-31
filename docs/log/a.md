@@ -24,3 +24,12 @@ Append-only, newest at the bottom. Format: BUILD_PLAN §6.
 - Did: D pushed 113d870 to main before base-0a existed; it could not import (`app.db.get_conn`, `app.auth.require`), had undefined names and a broken index migration, so I reverted the non-compiling files in 47881ef, kept the reusable SQL/Dockerfile/render.yaml/log, and opened issue #6 for D to rebase on `base-0a`.
 - Files: `app/routes/{invoices,payments,reports}.py`, `app/services/{invoices,payments,reports,invariants}.py`, `scripts/{seed_scale,perf_check}.py`, `db/migrations/300_d_indexes.sql`, `app/templates/{invoices,payments,dashboard,overdue}/**`.
 - Tests: `make check` -> `44 passed` after the revert.
+
+## 2026-10-31 12:45 IST — A — A-09 follow-up — DONE
+- Did: `gh_bootstrap.py` now closes task issues whose box is already ticked (PR #54, merged) and labels/milestones/issues/branch protection are live on GitHub; verified a fresh clone of `main` (`make setup && make migrate && make check`); smoke-tested uvicorn (`/health` 200, `/login` 200).
+- Files: `scripts/gh_bootstrap.py`, `docs/log/a.md`.
+- Contract changes: none.
+- Decisions: none.
+- Tests: fresh clone at a18318c -> `44 passed, 1 warning in 5.13s`; `make check` in the working tree -> `44 passed`.
+- Next: A-10 (staff users page, RBAC matrix + IDOR tests).
+- Needs from others: C: open the C-01 PR so `app/static/ledger.css` reaches main; B: PRs for B-01..B-04; D: rebase on `base-0a` (issue #6).
