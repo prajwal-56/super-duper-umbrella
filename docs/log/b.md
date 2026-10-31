@@ -98,3 +98,12 @@
 - Tests: make check -> 149 passed, 1 warning in 26.34s
 - Next: B-13 (randomized month simulation)
 - Needs from others: C to surface the preview on subscription pages
+
+## 2026-10-31 14:50 IST — B — B-13 — DONE
+- Did: Added `tests/engine/test_month_simulation.py`: a seeded 12-step month simulation that advances the simulated clock, randomizes pause/resume/early close, runs live billing (with random auto-confirm), confirms drafts, records partial/full payments through `payments.record`, and asserts every `invariants.run_all` check plus per-run accounting (`considered == items`, `sum(periods_billed) == invoices_created`) after every step.
+- Files: tests/engine/test_month_simulation.py, app/services/invariants.py (TOUCHES D, tiny blocking fix), docs/log/b.md, docs/tasks/b.md
+- Contract changes: none
+- Decisions: fixed two D invariant bugs exposed by the simulation — INV-04 now ignores future periods, honours `closed_on` and counts cancelled invoices as recorded voids; INV-06 now compares the dashboard with an independent raw recomputation instead of testing the row count. Both are in D's file and need @shreeram-tech review.
+- Tests: make check -> 149 passed, 1 warning in 30.72s
+- Next: B tasks complete; help with integration/freeze if unassigned work appears
+- Needs from others: D review of the two invariant fixes in this PR
