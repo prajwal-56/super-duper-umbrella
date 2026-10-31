@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Record Payment</title></head>
+<body class="ledger-sheet">
+<header><h1>Record Payment</h1><nav> / <a href="/app/invoices/{{ invoice.id }}">invoice</a></nav></header>
+<main>
+<form method="post" action="/app/payments/{{ invoice.id }}">
+  <input type="hidden" name="idempotency_key" value="{{ idempotency_key or '' }}">
+  <fieldset>
+    <legend>Payment details</legend>
+    <p>Method: <select name="method"><option value="cash">Cash</option><option value="bank_transfer">Bank Transfer</option><option value="card">Card</option><option value="upi">UPI</option><option value="cheque">Cheque</option><option value="other">Other</option></select></p>
+    <p>Amount: <input type="number" name="amount_minor" step="1" min="1" required></p>
+    <p>Date: <input type="date" name="paid_on" value="{{ today }}"></p>
+    <p>Note: <input type="text" name="note"></p>
+  </fieldset>
+  <button type="submit">Record Payment</button>
+</main>
+<footer>FOLIO app/payments/{{ invoice.id }} · set in {{ request_time }} ms</footer>
+</body>
+</html>
