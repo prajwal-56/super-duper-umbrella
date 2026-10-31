@@ -1,22 +1,56 @@
-<!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Overdue Invoices</title></head>
-<body class="ledger-sheet">
-<header><h1>Overdue Invoices</h1><nav> / <a href="/app/dashboard">dashboard</a></nav></header>
-<main>
-<table>
-<thead><tr><th>Number</th><th>Due Date</th><th>Total</th><th>Paid</th><th>Outstanding</th><th>Send Reminder</th></tr></thead>
-<tbody>
-{% for inv in overdue.invoices %}
-<tr><td>{{ inv.number }}</td><td>{{ inv.due_date }}</td><td>{{ inv.total_minor|fmt }}</td><td>{{ inv.amount_paid_minor|fmt }}</td><td>{{ inv.outstanding|fmt }}</td><td><form method="post" action="/app/invoices/{{ inv.id }}/send"><button>Reminder</button></form></td></tr>
-{% endfor %}
-</tbody>
-</table>
-{% if overdue.total == 0 %}
-<p>No overdue invoices.</p>
-{% endif %}
-<a href="/app/dashboard">Back to dashboard</a>
-</main>
-<footer>FOLIO app/overdue · set in {{ request_time }} ms</footer>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="sheet">
+  <div class="masthead">
+    <div class="brand">
+      <span class="section-label">Finance &amp; Collections</span>
+      <h1>Overdue Invoices</h1>
+    </div>
+  </div>
+
+  <div class="content">
+    <section class="section">
+      <h2 class="section-label">&sect; 1 &nbsp; Delinquent Ledger Items</h2>
+      {% if overdue.invoices %}
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Invoice</th>
+            <th>Due Date</th>
+            <th class="num">Total</th>
+            <th class="num">Paid</th>
+            <th class="num">Outstanding</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inv in overdue.invoices %}
+          <tr>
+            <td><a href="/app/invoices/{{ inv.id }}"><code>{{ inv.number or inv.id }}</code></a></td>
+            <td>{{ inv.due_date }}</td>
+            <td class="num">{{ inv.total_minor | money }}</td>
+            <td class="num">{{ inv.amount_paid_minor | money }}</td>
+            <td class="num">{{ inv.outstanding | money }}</td>
+            <td>
+              <form method="post" action="/app/invoices/{{ inv.id }}/send">
+                <button type="submit" class="button">Send Reminder</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state">
+        <p>No invoices are currently overdue.</p>
+      </div>
+      {% endif %}
+    </section>
+
+    <div class="field">
+      <a href="/app/dashboard" class="button">Back to dashboard</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

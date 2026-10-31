@@ -1,33 +1,66 @@
-<!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Dashboard</title></head>
-<body class="ledger-sheet">
-<header><h1>Trial Balance</h1><nav> / <a href="/app">app</a> <span>staff</span></span></nav></header>
-<main>
-<div class="leaders">
-  <div><span>Active Subscriptions</span><span>{{ dashboard.active_count|fmt }}</span></div>
-  <div><span>MRR</span><span>{{ (dashboard.collected / 12)|fmt }}</span></div>
-  <div><span>Collected</span><span>{{ dashboard.collected|fmt }}</span></div>
-  <div><span>Outstanding</span><span>{{ dashboard.outstanding|fmt }}</span></div>
-  <div><span>Overdue Count</span><span>{{ dashboard.overdue_count|fmt }}</span></div>
-  <div><span>Overdue Amount</span><span>{{ dashboard.overdue_amount|fmt }}</span></div>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="sheet">
+  <div class="masthead">
+    <div class="brand">
+      <span class="section-label">Finance &amp; Operations</span>
+      <h1>Executive Dashboard</h1>
+    </div>
+  </div>
+
+  <div class="content">
+    <section class="section">
+      <h2 class="section-label">&sect; 1 &nbsp; Key Performance Indicators</h2>
+      <div class="leaders">
+        <div class="field">
+          <span>Active Subscriptions</span>
+          <strong>{{ active_count }}</strong>
+        </div>
+        <div class="field">
+          <span>Monthly Recurring Revenue (MRR)</span>
+          <strong>{{ mrr | money }}</strong>
+        </div>
+        <div class="field">
+          <span>Total Collected</span>
+          <strong>{{ collected | money }}</strong>
+        </div>
+        <div class="field">
+          <span>Total Outstanding</span>
+          <strong>{{ outstanding | money }}</strong>
+        </div>
+        <div class="field">
+          <span>Overdue Count</span>
+          <strong>{{ overdue_count }}</strong>
+        </div>
+        <div class="field">
+          <span>Overdue Amount</span>
+          <strong>{{ overdue_amount | money }}</strong>
+        </div>
+      </div>
+    </section>
+
+    {% if revenue_by_month %}
+    <section class="section">
+      <h2 class="section-label">&sect; 2 &nbsp; Monthly Billed Revenue</h2>
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th class="num">Billed Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in revenue_by_month %}
+          <tr>
+            <td>{{ row.month }}</td>
+            <td class="num">{{ row.revenue | money }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endif %}
+  </div>
 </div>
-<h2>Overdue Invoices</h2>
-<table>
-<thead><tr><th>Number</th><th>Due Date</th><th>Total</th><th>Paid</th><th>Outstanding</th><th>Actions</th></tr></thead>
-<tbody>
-{% for inv in overdue.invoices %}
-<tr><td>{{ inv.number }}</td><td>{{ inv.due_date }}</td><td>{{ inv.total_minor|fmt }}</td><td>{{ inv.amount_paid_minor|fmt }}</td><td>{{ inv.outstanding|fmt }}</td><td><a href="/app/invoices/{{ inv.id }}">View</a></tr>
-{% endfor %}
-</tbody>
-</table>
-{% if overdue.total == 0 %}
-<p>No overdue invoices.</p>
-{% endif %}
-<h3>Aging</h3>
-<div class="leaders">
-  <div><span>0-30 days</span><span>{{ dashboard.aging_0_30|fmt }}</span></div>
-  <div><span>31-60 days</span><span>{{ dashboard.aging_31_60|fmt }}</span></div>
-  <div><span>61-90 days</span><span>{{ dashboard.aging_61_90|fmt }}</span></div>
-  <div><span>90+ days</span><span>{{ dashboard.aging_90plus|fmt }}</span></div>
-</div>
+{% endblock %}

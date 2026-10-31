@@ -55,17 +55,7 @@ check: lint style-lint
 	$(PY) -m pytest -q
 
 invariants:
-	@$(PY) - <<'PYEOF'
-	from app.db import conn
-	from app.services.invariants import run_all
-	with conn() as c:
-	    results = run_all(c)
-	for r in results:
-	    print(("PASS" if r.ok else "FAIL"), r.id, r.name, "violations=%s" % r.violations)
-	failed = [r.id for r in results if not r.ok]
-	print("invariants: %d checks, %d failing" % (len(results), len(failed)))
-	raise SystemExit(1 if failed else 0)
-	PYEOF
+	@$(PY) -c "from app.db import conn; from app.services.invariants import run_all; c = conn().__enter__(); results = run_all(c); [print(('PASS' if r.ok else 'FAIL'), r.id, r.name, f'violations={r.violations}') for r in results]; failed = [r.id for r in results if not r.ok]; print(f'invariants: {len(results)} checks, {len(failed)} failing'); raise SystemExit(1 if failed else 0)"
 
 perf:
 	$(PY) scripts/perf_check.py

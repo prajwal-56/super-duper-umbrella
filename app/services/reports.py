@@ -81,16 +81,16 @@ def dashboard(conn: psycopg.Connection, filters: dict) -> dict:
     aging_rows = conn.execute(
         """
         SELECT
-            COUNT(*) FILTER (WHERE CURRENT_DATE - due_date <= 30) AS "0-30",
-            COUNT(*) FILTER (WHERE CURRENT_DATE - due_date BETWEEN 31 AND 60) AS "31-60",
-            COUNT(*) FILTER (WHERE CURRENT_DATE - due_date BETWEEN 61 AND 90) AS "61-90",
-            COUNT(*) FILTER (WHERE CURRENT_DATE - due_date > 90) AS "90+"
+            COUNT(*) FILTER (WHERE %s - due_date <= 30) AS "0-30",
+            COUNT(*) FILTER (WHERE %s - due_date BETWEEN 31 AND 60) AS "31-60",
+            COUNT(*) FILTER (WHERE %s - due_date BETWEEN 61 AND 90) AS "61-90",
+            COUNT(*) FILTER (WHERE %s - due_date > 90) AS "90+"
         FROM invoices
         WHERE status = 'confirmed'
           AND (total_minor - amount_paid_minor) > 0
           AND due_date < %s
         """,
-        (as_of,),
+        (as_of, as_of, as_of, as_of, as_of),
     ).fetchone()
     aging_0_30 = int(aging_rows["0-30"])
     aging_31_60 = int(aging_rows["31-60"])

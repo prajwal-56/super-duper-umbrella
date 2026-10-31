@@ -8,9 +8,9 @@ BASE = os.environ.get("APP_BASE_URL", "http://localhost:8000")
 API = f"{BASE}/app"
 
 def timing(client, method, url, **kwargs):
-    start = time.time()
+    start = time.time()  # real-time-ok
     resp = client.request(method, url, **kwargs)
-    elapsed = (time.time() - start) * 1000  # ms
+    elapsed = (time.time() - start) * 1000  # ms  # real-time-ok
     return resp.status_code, elapsed
 
 def main():
