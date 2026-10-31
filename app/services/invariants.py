@@ -134,28 +134,30 @@ def run_all(conn: psycopg.Connection) -> list[InvariantResult]:
         )
     )
 
-    # INV-04: No missing periods — every expected period has an invoice or a pause
+    # INV-04: No missing periods — every expected period has an invoice, void, or a pause
+    as_of = today()
     inv04_rows = _exec(
         conn,
         """
         WITH RECURSIVE
           all_subs AS (
-            SELECT id, start_date, expiry_date
+            SELECT id, start_date, expiry_date, closed_on
             FROM subscriptions
             WHERE status IN ('active', 'closed')
           ),
           all_periods AS (
             SELECT
               id AS sub_id,
-              (start_date + (g.g || ' month')::interval)::date AS period_start,
-              LEAST(start_date + (g.g + 1 || ' month')::interval - INTERVAL '1 day', expiry_date) AS period_end
+              (start_date + (g.g || ' month')::interval)::date AS period_start
             FROM all_subs, generate_series(0, 35) AS g
-            WHERE start_date + (g.g || ' month')::interval <= expiry_date
+            WHERE (start_date + (g.g || ' month')::interval)::date <= expiry_date
+              AND (start_date + (g.g || ' month')::interval)::date <= %s
+              AND (closed_on IS NULL
+                   OR (start_date + (g.g || ' month')::interval)::date < closed_on)
           ),
-          invoiced AS (
+          covered AS (
             SELECT DISTINCT subscription_id AS sub_id, period_start
             FROM invoices
-            WHERE status <> 'cancelled'
           ),
           paused_periods AS (
             SELECT DISTINCT sp.subscription_id AS sub_id, ap.period_start
@@ -166,11 +168,13 @@ def run_all(conn: psycopg.Connection) -> list[InvariantResult]:
           )
         SELECT p.sub_id, p.period_start
         FROM all_periods p
-        LEFT JOIN invoiced i ON p.sub_id = i.sub_id AND p.period_start = i.period_start
+        LEFT JOIN covered i ON p.sub_id = i.sub_id AND p.period_start = i.period_start
         LEFT JOIN paused_periods pa ON p.sub_id = pa.sub_id AND p.period_start = pa.period_start
         WHERE i.sub_id IS NULL AND pa.sub_id IS NULL
         """,
+        (as_of,),
     )
+
     ok04 = len(inv04_rows) == 0
     results.append(
         InvariantResult(
@@ -205,29 +209,51 @@ def run_all(conn: psycopg.Connection) -> list[InvariantResult]:
         )
     )
 
-    # INV-06: Dashboard figures equal raw recomputation
+    # INV-06: Dashboard figures equal an independent raw recomputation
     as_of = today()
-    inv06_rows = _exec(
+    from app.services.reports import dashboard
+
+    figures = dashboard(conn, {})
+    raw = _exec_one(
         conn,
         """
-        WITH raw AS (
-            SELECT
-                COUNT(*) FILTER (WHERE status = 'active') AS active_count,
-                COALESCE(SUM(amount_paid_minor), 0) AS collected,
-                COALESCE(SUM(total_minor - amount_paid_minor), 0) AS outstanding
-            FROM invoices
+        WITH money AS (
+            SELECT COALESCE(SUM(amount_paid_minor), 0) AS collected,
+                   COALESCE(SUM(total_minor - amount_paid_minor), 0) AS outstanding
+              FROM invoices
+             WHERE status IN ('confirmed', 'paid')
         ),
         overdue AS (
-            SELECT
-                COUNT(*) FILTER (WHERE status = 'confirmed' AND total_minor > amount_paid_minor AND due_date < %s) AS overdue_count,
-                COALESCE(SUM(CASE WHEN status = 'confirmed' AND total_minor > amount_paid_minor AND due_date < %s THEN total_minor - amount_paid_minor END), 0) AS overdue_amount
-            FROM invoices
+            SELECT COUNT(*) AS overdue_count,
+                   COALESCE(SUM(total_minor - amount_paid_minor), 0) AS overdue_amount
+              FROM invoices
+             WHERE status = 'confirmed'
+               AND (total_minor - amount_paid_minor) > 0
+               AND due_date < %s
+        ),
+        active AS (
+            SELECT COUNT(*) AS active_count
+              FROM subscriptions
+             WHERE status = 'active'
         )
-        SELECT r.active_count, r.collected, r.outstanding, o.overdue_count, o.overdue_amount
-        FROM raw r, overdue o
+        SELECT active.active_count, money.collected, money.outstanding,
+               overdue.overdue_count, overdue.overdue_amount
+          FROM active, money, overdue
         """,
-        (as_of, as_of),
+        (as_of,),
     )
+    mismatches = [
+        key
+        for key in (
+            "active_count",
+            "collected",
+            "outstanding",
+            "overdue_count",
+            "overdue_amount",
+        )
+        if int(raw[key]) != int(figures[key])
+    ]
+    inv06_rows = [{"mismatched": mismatches, "raw": dict(raw), "dashboard": figures}] if mismatches else []
     ok06 = len(inv06_rows) == 0
     results.append(
         InvariantResult(

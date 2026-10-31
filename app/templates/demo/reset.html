@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="sheet">
+  <div class="masthead">
+    <div class="brand">
+      <span class="section-label">System Admin</span>
+      <h1>Reset Demo Dataset</h1>
+    </div>
+  </div>
+
+  <div class="content">
+    {% if error %}
+    <div class="notice error">
+      <p>{{ error }}</p>
+    </div>
+    {% endif %}
+
+    <div class="notice">
+      <p><strong>Warning:</strong> This action will truncate all transactional and catalog data in the ledger and rebuild the pristine §18 demo dataset (25 customers, products with variants, plans, discounts, subscriptions, invoices, and payments).</p>
+      <p>This operation is only available because <code>DEMO_MODE=true</code> is enabled.</p>
+    </div>
+
+    <form method="post" action="/app/demo/reset" class="form">
+      <div class="field">
+        <label for="confirm">Type <strong>RESET</strong> to confirm:</label>
+        <input type="text" id="confirm" name="confirm" required autocomplete="off" placeholder="RESET" />
+      </div>
+
+      <div class="field">
+        <button type="submit" class="button destructive">Purge and Re-seed Ledger</button>
+        <a href="/app/dashboard" class="button">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

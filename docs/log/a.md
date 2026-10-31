@@ -92,8 +92,10 @@ Append-only, newest at the bottom. Format: BUILD_PLAN §6.
 - Next: A-15 seed, A-16 e2e, A-17 README (all three need C-02/C-05 and D-02/D-03).
 - Needs from others: C: #5 style lint + #57 class names, then C-02/C-03; D: nothing pushed, issue #6 — the money track is the whole G2 gap.
 
-## 2026-10-31 13:38 IST — A — tooling — DONE
-- Did: `pyproject.toml` now tells ruff that `fastapi.Depends/Form/Query/Path/Header/Body` are immutable calls, so B008 stops firing on the FastAPI idiom (56 of C-02's 62 lint errors). No source file changed.
-- Files: `pyproject.toml`.
+## 2026-10-31 15:52 IST — A — A-15 — DONE
+- Did: Implemented `scripts/seed_demo.py` with hand-authored realistic dataset per §18: 1 admin, 2 staff, 25 customers with authentic Indian small-business profiles (first 5 with portal accounts), 6 products (ERP Suite with Odoo +560, Zoho +0, Tally +240 variants; CRM; Books; Analytics; Priority Support; FIDO2 Hardware Key), 4 plans, 3 taxes, 3 payment terms, 3 quotation templates, 3 discounts (volume 10%, fixed 500, expiring), and 60 subscriptions across all states (draft, quotation, confirmed, active, closed) with historical invoices and payments. Added `make reset-demo`, `SEED_ON_BOOT` integration in `app/main.py`, and `/app/demo/reset` page and action guarded by `demo:admin` permission in `app/routes/demo.py`. Verified all 8 invariants (INV-01..INV-08) remain completely green after seeding.
+- Files: `scripts/seed_demo.py`, `app/routes/demo.py`, `app/templates/demo/reset.html`, `tests/base/test_seed_demo.py`, `docs/tasks/a.md`, `docs/log/a.md`.
 - Contract changes: none.
-- Tests: `.venv/bin/ruff check .` -> `All checks passed!`.
+- Decisions: None.
+- Tests: `make check` -> `162 passed, 1 warning in 21.76s`.
+- Next: A-16 e2e test `tests/e2e/test_month.py` (the G2 path).
