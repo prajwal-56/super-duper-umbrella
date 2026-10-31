@@ -19,3 +19,12 @@ Append-only, newest at the bottom. Format: BUILD_PLAN §6.
 - Tests: make check -> 66 passed, 1 warning in 5.71s
 - Next: B-05 (bill_subscription)
 - Needs from others: none
+
+## 2026-10-31 13:20 IST — B — B-05 — DONE
+- Did: Implemented `bill_subscription` in `app/services/billing.py` with derived expected periods, atomic discount claiming, savepoint rollbacks, calc_trace snapshots, auto-confirm option, and audit logging.
+- Files: app/services/billing.py, tests/engine/test_bill_subscription.py, docs/log/b.md
+- Contract changes: none
+- Decisions: none
+- Tests: make check -> 68 passed, 1 warning in 5.88s
+- Next: B-06 (run_billing)
+- Needs from others: none
