@@ -360,6 +360,57 @@ def bill_subscription(
     return created_invoice_ids
 
 
+
+def preview_next_invoice(
+    conn: psycopg.Connection, subscription_id: int
+) -> dict[str, Any] | None:
+    """Return the next unbilled invoice for a subscription without committing anything.
+
+    Runs the real billing path inside a savepoint, snapshots the first would-be
+    invoice, then rolls the savepoint back so discounts, sequences and invoices
+    are untouched.
+    """
+    savepoint = "sp_preview_next_invoice"
+    conn.execute(f"SAVEPOINT {savepoint}")
+    try:
+        created_ids = bill_subscription(conn, subscription_id, as_of=today())
+        if not created_ids:
+            conn.execute(f"RELEASE SAVEPOINT {savepoint}")
+            return None
+
+        invoice = conn.execute(
+            "SELECT * FROM invoices WHERE id = %(id)s", {"id": created_ids[0]}
+        ).fetchone()
+        line_rows = conn.execute(
+            """
+            SELECT description, quantity, unit_price_minor, line_subtotal_minor,
+                   discount_minor, tax_rate_bps, tax_inclusive, tax_minor,
+                   total_minor, calc_trace
+              FROM invoice_lines
+             WHERE invoice_id = %(id)s
+             ORDER BY id
+            """,
+            {"id": created_ids[0]},
+        ).fetchall()
+        preview = {
+            "period_start": invoice["period_start"],
+            "period_end": invoice["period_end"],
+            "issue_date": invoice["issue_date"],
+            "due_date": invoice["due_date"],
+            "subtotal_minor": invoice["subtotal_minor"],
+            "discount_minor": invoice["discount_minor"],
+            "tax_minor": invoice["tax_minor"],
+            "total_minor": invoice["total_minor"],
+            "lines": [dict(row) for row in line_rows],
+        }
+        conn.execute(f"ROLLBACK TO SAVEPOINT {savepoint}")
+        conn.execute(f"RELEASE SAVEPOINT {savepoint}")
+        return preview
+    except Exception:
+        conn.execute(f"ROLLBACK TO SAVEPOINT {savepoint}")
+        raise
+
+
 def _partition_periods(
     sub: dict[str, Any],
     pauses: list[tuple[date, date | None]],
