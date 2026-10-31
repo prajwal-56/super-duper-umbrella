@@ -81,3 +81,13 @@ Append-only, newest at the bottom. Format: BUILD_PLAN §6.
 - Not built: pause/resume/close/renew buttons (need `lifecycle.allowed_actions`, B-07) and D's `invoice_print.html` partial (D-02); the portal renders its own print layout until then.
 - Next: A-15 seed, A-16 e2e, A-17 README; merge captain at the 14:01 window.
 - Needs from others: B: rebase #2, #3, #4, #60; C: #5 style lint + #57 class names; D: nothing pushed, issue #6.
+
+## 2026-10-31 13:28 IST — A — A-11b — DONE (portal actions)
+- Did: the portal now offers pause / resume / renew / close / confirm exactly when `lifecycle.allowed_actions` returns them for the customer role, posts them to `/portal/subscriptions/{id}/action`, and re-renders with a 409 when the action is not allowed. Closing asks for a reason and stores it. Added a 409 exception handler so lifecycle conflicts render the ledger error page instead of JSON.
+- Files: `app/routes/portal.py`, `app/services/portal.py`, `app/templates/portal/subscription.html`, `app/main.py`, `tests/authz/test_portal_actions.py`.
+- Contract changes: none — the page consumes `lifecycle.allowed_actions(conn, id, role)` and the lifecycle writers as declared in §12.
+- Decisions: none.
+- Found: `subscription_lines` has no `description`/`line_subtotal_minor`; the portal read model now joins `products` for the label and computes the subtotal.
+- Tests: `make check` -> `114 passed, 1 warning in 17.60s`.
+- Next: A-15 seed, A-16 e2e, A-17 README (all three need C-02/C-05 and D-02/D-03).
+- Needs from others: C: #5 style lint + #57 class names, then C-02/C-03; D: nothing pushed, issue #6 — the money track is the whole G2 gap.

@@ -138,3 +138,15 @@ def not_found(request: Request, exc):
         title="Page not found",
         message="The page you asked for does not exist.",
     )
+
+
+@app.exception_handler(409)
+def conflict(request: Request, exc):
+    detail = getattr(exc, "detail", None)
+    return render(
+        request,
+        "error.html",
+        status_code=409,
+        title="That action is not possible now",
+        message=detail or "The record changed, or the action is not allowed in its current state.",
+    )

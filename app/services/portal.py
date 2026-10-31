@@ -43,8 +43,12 @@ def subscription_for_customer(
 def subscription_lines(conn: psycopg.Connection, subscription_id: int) -> list[dict]:
     return conn.execute(
         """
-        SELECT id, description, quantity, unit_price_minor, line_subtotal_minor
-        FROM subscription_lines WHERE subscription_id = %s ORDER BY id
+        SELECT sl.id, p.name AS description, sl.quantity, sl.unit_price_minor,
+               (sl.quantity * sl.unit_price_minor) AS line_subtotal_minor
+        FROM subscription_lines sl
+        LEFT JOIN products p ON p.id = sl.product_id
+        WHERE sl.subscription_id = %s
+        ORDER BY sl.id
         """,
         (subscription_id,),
     ).fetchall()
